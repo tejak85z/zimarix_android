@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Wakeword">
+
+    <Switch
+        android:id="@+id/switch1"
+        android:layout_width="match_parent"
+        android:layout_height="59dp"
+        android:layout_marginTop="32dp"
+        android:text="Enable Offline WakeWord"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="match_parent"
+        android:layout_height="59dp"
+        android:text="Edit Key Word Sensitivity"
+        app:layout_constraintTop_toBottomOf="@+id/switch1"
+        tools:layout_editor_absoluteX="67dp" />
+
+    <EditText
+        android:id="@+id/wwtimeout"
+        android:layout_width="100dp"
+        android:layout_height="59dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        app:layout_constraintStart_toEndOf="@id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/button2" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="200dp"
+        android:layout_height="59dp"
+        android:text="Wakeword Sequence Timeout"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button2" />
+
+    <Button
+        android:id="@+id/wwtimeoutsave"
+        android:layout_width="100dp"
+        android:layout_height="59dp"
+        android:text="SAVE"
+        app:layout_constraintStart_toEndOf="@id/wwtimeout"
+        app:layout_constraintTop_toBottomOf="@+id/button2" />
+
+    <Button
+        android:id="@+id/addwakewordbutton"
+        android:layout_width="match_parent"
+        android:layout_height="59dp"
+        android:text="Add New Command"
+        app:layout_constraintTop_toBottomOf="@+id/textView"/>
+
+    <ListView
+        android:id="@+id/wwlist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:background="#AEC2D1"
+        app:layout_constraintTop_toBottomOf="@+id/addwakewordbutton"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
