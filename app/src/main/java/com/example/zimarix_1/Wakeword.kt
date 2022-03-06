@@ -1,12 +1,15 @@
 package com.example.zimarix_1
 
 import android.app.AlertDialog
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.StrictMode
 import android.util.Log
+import android.util.TypedValue
 import android.widget.*
 import com.example.zimarix_1.zimarix_global.Companion.curr_device
+import org.w3c.dom.Text
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.Socket
@@ -21,7 +24,7 @@ class Wakeword : AppCompatActivity() {
 
         var wake_words = arrayOf<String>()
         var wake_seq = arrayOf<String>()
-        var active_devices = arrayOf<String>()
+        var active_devices = arrayOf<String>("SELECT DEVICE")
         var wwenable = 0
         var wwtimeout = "10"
         zimarix_global.dev_config.forEach{
@@ -101,54 +104,29 @@ class Wakeword : AppCompatActivity() {
         //type.setSelection(port[4].toInt())
         layout.addView(devtype)
 
-        val action = "ON,OFF,TOGGLE".split(",")
+        val action = "SELECT ACTION,ON,OFF,TOGGLE".split(",")
         val type = Spinner(this)
         type.adapter =
             this?.let { ArrayAdapter(it, android.R.layout.simple_spinner_dropdown_item, action) }
         //type.setSelection(port[4].toInt())
         layout.addView(type)
 
+        val txt = TextView(this)
+        txt.setText("MAKE SEQUENCE FOR THIS DEVICE ACTION\n Empty fields will be ignored ")
+        txt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        txt.setTextColor(Color.BLUE)
+        layout.addView(txt)
+
         val ww1 = wws
-        val ww1type = Spinner(this)
-        ww1type.adapter =
-            this?.let { ArrayAdapter(it, android.R.layout.simple_spinner_dropdown_item, ww1) }
-        layout.addView(ww1type)
 
-        val ww2type = Spinner(this)
-        ww2type.adapter =
-            this?.let { ArrayAdapter(it, android.R.layout.simple_spinner_dropdown_item, ww1) }
-        layout.addView(ww2type)
+        var wwstype = arrayOf<Spinner>()
 
-        val ww3type = Spinner(this)
-        ww3type.adapter =
-            this?.let { ArrayAdapter(it, android.R.layout.simple_spinner_dropdown_item, ww1) }
-        layout.addView(ww3type)
-
-        val ww4type = Spinner(this)
-        ww4type.adapter =
-            this?.let { ArrayAdapter(it, android.R.layout.simple_spinner_dropdown_item, ww1) }
-        layout.addView(ww4type)
-
-        val ww5type = Spinner(this)
-        ww5type.adapter =
-            this?.let { ArrayAdapter(it, android.R.layout.simple_spinner_dropdown_item, ww1) }
-        layout.addView(ww5type)
-
-        val ww6type = Spinner(this)
-        ww6type.adapter =
-            this?.let { ArrayAdapter(it, android.R.layout.simple_spinner_dropdown_item, ww1) }
-        layout.addView(ww6type)
-
-        val ww7type = Spinner(this)
-        ww7type.adapter =
-            this?.let { ArrayAdapter(it, android.R.layout.simple_spinner_dropdown_item, ww1) }
-        layout.addView(ww7type)
-
-        val ww8type = Spinner(this)
-        ww8type.adapter =
-            this?.let { ArrayAdapter(it, android.R.layout.simple_spinner_dropdown_item, ww1) }
-        layout.addView(ww8type)
-
+        for (i in 0..8){
+            val wwtype = Spinner(this)
+            wwtype.adapter = this?.let { ArrayAdapter(it, android.R.layout.simple_spinner_dropdown_item, ww1) }
+            layout.addView(wwtype)
+            wwstype = wwstype + wwtype
+        }
         layout.setPadding(50, 40, 50, 10)
 
         val builder = AlertDialog.Builder(this)
@@ -164,48 +142,22 @@ class Wakeword : AppCompatActivity() {
         dialog.setOnShowListener {
             val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             okButton.setOnClickListener {
-                /*
-                var update = 0
-                var portenable = "0"
-                var portname = ""
-                if(enable.isChecked == true){
-                    if(port[3] == "0"){
-                        update = 1
+                if(devtype.selectedItem == "SELECT DEVICE"){
+                    Toast.makeText(this, "Select a device", Toast.LENGTH_SHORT).show()
+                }else if (type.selectedItem == "SELECT ACTION"){
+                    Toast.makeText(this, "Select an action for this device", Toast.LENGTH_SHORT).show()
+                } else {
+                    var wwseq = "U,portww,"+devtype.selectedItem+","+type.selectedItem+","
+                    wwstype.forEach {
+                        if(it.selectedItem != "EMPTY"){
+                            wwseq = wwseq+it.selectedItem+"_raspberry-pi.ppn+"
+                        }
                     }
-                    portenable = "1"
-                }else{
-                    if(port[3] == "1")
-                        update = 1
+                    Toast.makeText(this, wwseq, Toast.LENGTH_SHORT).show()
+                    encrypt_and_send_data(wwseq)
                 }
 
-                if(Portname.text.isBlank()){
-                    portname = port[2]
-                }else {
-                    portname = Portname.text.toString()
-                    if(Portname.text.toString() != port[2]){
-                        update = 1
-                    }
-                }
-                var i = 0;
-                for(item in porttypes){
-                    if(item == type.selectedItem)
-                        break
-                    i = i + 1
-                }
-                if (i.toString() != port[4])
-                    update = 1
-
-                var PS = "0"
-                if(powersave.isChecked == true){
-                    if(port[5] == "0"){
-                        update = 1
-                    }
-                    PS = "1"
-                }else{
-                    if(port[5] == "1")
-                        update = 1
-                }
-
+              /*
                 if(enable.isChecked == true && i == 0){
                     Toast.makeText(context, "Select Port type", Toast.LENGTH_SHORT).show()
                 }else {
