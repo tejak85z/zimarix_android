@@ -22,9 +22,9 @@
     <string name="tab_text_2">Devices</string>
     <string name="tab_text_3">Video</string>
     <string name="tab_text_4">Payment</string>
-    <string name="Stab_text_1">CONTROLLER PORT SETTINGS</string>
-    <string name="Stab_text_2">CONREOLLER SETTINGS</string>
-    <string name="Stab_text_3">CONTROLLER IR DEVICE SETTINGS</string>
+    <string name="Stab_text_1">SWITCH SETTINGS</string>
+    <string name="Stab_text_2">DEVICE SETTINGS</string>
+    <string name="Stab_text_3">REMOTE CONTROL SETTINGS</string>
 
 
     <string-array name="SwitchType">

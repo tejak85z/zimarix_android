@@ -1,12 +1,14 @@
 package com.example.zimarix_1
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.StrictMode
 import android.util.Log
 import android.util.TypedValue
+import android.view.View
 import android.widget.*
 import com.example.zimarix_1.zimarix_global.Companion.curr_device
 import org.w3c.dom.Text
@@ -34,11 +36,12 @@ class Wakeword : AppCompatActivity() {
                 wake_words = wake_words + it
             else if (row[0] == "wwseq") {
                 if (row.size >= 3) {
-                    var ww_ui = ww_display(row[2])
-                    wake_seq = wake_seq + (row[1] + "  " + ww_ui)
-                    if (row.size == 4)
-                        ww_ui = ww_display(row[3])
-                    wake_seq = wake_seq + (row[1] + "  " + ww_ui)
+                    val ww_ui = ww_display(row[2])
+                    wake_seq = wake_seq + (row[1] + ":" + ww_ui)
+                }
+                if (row.size == 4){
+                    val ww_ui = ww_display(row[3])
+                    wake_seq = wake_seq + (row[1] + ":" + ww_ui)
                 }
             }
             else if (row[0] == "conf" && row[1] == "Offline Wake Word Config") {
@@ -62,8 +65,13 @@ class Wakeword : AppCompatActivity() {
             Toast.makeText(this@Wakeword, resp, Toast.LENGTH_SHORT).show()
         }
 
+        val ww_sensitivity_btn = findViewById<Button>(R.id.button2)
+        ww_sensitivity_btn.setOnClickListener{
+            ww_sensitivity_dialog(wake_words)
+        }
+
         val ww_timeout = findViewById<EditText>(R.id.wwtimeout)
-        ww_timeout.hint = wwtimeout + " Min 0 and Max 30"
+        ww_timeout.hint = wwtimeout
         val ww_timeout_save_btn = findViewById<Button>(R.id.wwtimeoutsave)
         ww_timeout_save_btn.setOnClickListener{
             if(ww_timeout.text.length > 0) {
@@ -83,7 +91,154 @@ class Wakeword : AppCompatActivity() {
         listView.adapter = adapter
 
         listView.setOnItemClickListener { parent, view, position, id ->
+            edit_ww_seq(view, wake_seq, position, wake_words)
         }
+
+        listView.setOnItemLongClickListener { parent, view, position, id ->
+            edit_ww_seq(view, wake_seq, position, wake_words)
+            return@setOnItemLongClickListener(true)
+        }
+
+    }
+
+    fun edit_ww_seq(view:View,wake_seq : Array<String>, position: Int, wake_words: Array<String> ){
+        val popupMenu: PopupMenu = PopupMenu(this, view)
+        popupMenu.menuInflater.inflate(R.menu.ww_list_popup,popupMenu.menu)
+        popupMenu.setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener { item ->
+            if(item.title == "EDIT SEQUENCE"){
+                Toast.makeText(this, "EDIT " +wake_seq[position], Toast.LENGTH_SHORT).show()
+                edit_ww_dialog(wake_seq[position],wake_words)
+            }else if(item.title == "DELETE SEQUENCE"){
+                Toast.makeText(this, "DELETE " +wake_seq[position], Toast.LENGTH_SHORT).show()
+                var lst = wake_seq[position].split(":")
+                val dev = lst[0]
+                val action = lst[1].trim()
+                var wwseq = "U,portww,DELETE,"+dev+","+action+","
+                encrypt_and_send_data(wwseq)
+            }
+            true
+        })
+        popupMenu.show()
+    }
+
+    fun edit_ww_dialog(ww_info : String, wake_words: Array<String>) {
+
+        var lst = ww_info.split(":")
+        val dev = lst[0]
+        val action = lst[1].trim()
+        val curr_wws = lst[2].split("+")
+
+        var wws = arrayOf<String>()
+        wws = wws + "EMPTY"
+        wake_words.forEach {
+            val ww = it.split(",")[1]
+            wws = wws + ww.replace("_raspberry-pi.ppn", "")
+        }
+        val layout = LinearLayout(this)
+        layout.orientation = LinearLayout.VERTICAL
+
+        var wwstype = arrayOf<Spinner>()
+
+        for (i in 0..7){
+            val wwtype = Spinner(this)
+            wwtype.adapter = this?.let { ArrayAdapter(it, android.R.layout.simple_spinner_dropdown_item, wws) }
+            if (i < curr_wws.size && curr_wws[i].length > 1 ) {
+                var j = 0
+                wws.forEach {
+                    if (it == curr_wws[i].trim()) {
+                        wwtype.setSelection(j)
+                        return@forEach
+                    }
+                    j = j + 1
+                }
+            }
+            layout.addView(wwtype)
+            wwstype = wwstype + wwtype
+        }
+        layout.setPadding(50, 40, 50, 10)
+
+        val builder = AlertDialog.Builder(this)
+            .setTitle("EDIT Command Sequence for " + dev + " "+action)
+            .setView(layout)
+            .setPositiveButton("UPDATE", null)
+            .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
+                // so something, or not - dialog will close
+                dialog.dismiss()
+            }
+        val dialog = builder.create()
+
+        dialog.setOnShowListener {
+            val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            okButton.setOnClickListener {
+                var wwseq = "U,portww,"+dev+","+action+","
+                wwstype.forEach {
+                    if(it.selectedItem != "EMPTY"){
+                        wwseq = wwseq+it.selectedItem+"_raspberry-pi.ppn+"
+                    }
+                }
+                val resp = encrypt_and_send_data(wwseq)
+                Toast.makeText(this, resp, Toast.LENGTH_SHORT).show()
+                if (resp == "OK"){
+                    dialog.dismiss()
+                }
+            }
+
+        }
+        dialog.show()
+    }
+
+    fun ww_sensitivity_dialog(wake_words: Array<String>){
+        val layout = LinearLayout(this)
+        layout.orientation = LinearLayout.VERTICAL
+
+        val txt = TextView(this)
+        txt.setText("Sensitivity value should between 0 and 1.\n Default value 0.7 \n High sensitivity can cause false positive trigger")
+        txt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        txt.setTextColor(Color.BLUE)
+        layout.addView(txt)
+
+        var wws_snty = arrayOf<EditText>()
+        wake_words.forEach {
+            val ww_snsty = EditText(this)
+            ww_snsty.setSingleLine()
+            val param = it.split(",")
+            val name = param[1].replace("_raspberry-pi.ppn", "")
+            ww_snsty.hint = name + " = " + param[2]
+            layout.addView(ww_snsty)
+            wws_snty = wws_snty + ww_snsty
+        }
+
+        layout.setPadding(50, 40, 50, 10)
+
+        val builder = AlertDialog.Builder(this)
+            .setTitle("EDIT KEY WORD SENSITIVITY")
+            .setView(layout)
+            .setPositiveButton("UPDATE", null)
+            .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
+                // so something, or not - dialog will close
+                dialog.dismiss()
+            }
+        val dialog = builder.create()
+
+        dialog.setOnShowListener {
+            val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            okButton.setOnClickListener {
+                var i = 0
+                var req = "U,ww,sensitivity,"
+                wws_snty.forEach {
+                    if(it.text.isNotBlank()){
+                        req = req + wake_words[i].split(",")[1]+ ":"+it.text.toString()+","
+                    }
+                    i = i + 1
+                }
+                val resp = encrypt_and_send_data(req)
+                Toast.makeText(this, resp, Toast.LENGTH_SHORT).show()
+                if (resp == "OK"){
+                    dialog.dismiss()
+                }
+            }
+        }
+        dialog.show()
     }
 
     fun add_ww_dialog(active_devices: Array<String>, wake_words: Array<String>) {
@@ -121,7 +276,7 @@ class Wakeword : AppCompatActivity() {
 
         var wwstype = arrayOf<Spinner>()
 
-        for (i in 0..8){
+        for (i in 0..7){
             val wwtype = Spinner(this)
             wwtype.adapter = this?.let { ArrayAdapter(it, android.R.layout.simple_spinner_dropdown_item, ww1) }
             layout.addView(wwtype)
@@ -153,8 +308,11 @@ class Wakeword : AppCompatActivity() {
                             wwseq = wwseq+it.selectedItem+"_raspberry-pi.ppn+"
                         }
                     }
-                    Toast.makeText(this, wwseq, Toast.LENGTH_SHORT).show()
-                    encrypt_and_send_data(wwseq)
+                    val resp = encrypt_and_send_data(wwseq)
+                    Toast.makeText(this, resp, Toast.LENGTH_SHORT).show()
+                    if (resp == "OK"){
+                        dialog.dismiss()
+                    }
                 }
 
               /*

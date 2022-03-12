@@ -23,13 +23,14 @@
         <entry key="app/src/main/res/layout/settings_activity.xml" value="0.21145833333333333" />
         <entry key="app/src/main/res/layout/swich_dropdown_item.xml" value="0.23155737704918034" />
         <entry key="app/src/main/res/menu/add_popup_menu.xml" value="0.21145833333333333" />
+        <entry key="app/src/main/res/menu/ww_list_popup.xml" value="0.12335526315789473" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.14769736842105263" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.14769736842105263" />
         <entry key="app/src/main/res/xml/root_preferences.xml" value="0.21145833333333333" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="11" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="JDK" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">
