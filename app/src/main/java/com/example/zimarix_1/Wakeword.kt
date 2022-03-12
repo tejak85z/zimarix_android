@@ -113,7 +113,7 @@ class Wakeword : AppCompatActivity() {
                 var lst = wake_seq[position].split(":")
                 val dev = lst[0]
                 val action = lst[1].trim()
-                var wwseq = "U,portww,DELETE,"+dev+","+action+","
+                var wwseq = "U,ww,DELETE,"+dev+","+action+","
                 encrypt_and_send_data(wwseq)
             }
             true
@@ -170,7 +170,7 @@ class Wakeword : AppCompatActivity() {
         dialog.setOnShowListener {
             val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             okButton.setOnClickListener {
-                var wwseq = "U,portww,"+dev+","+action+","
+                var wwseq = "U,ww,EDIT,"+dev+","+action+","
                 wwstype.forEach {
                     if(it.selectedItem != "EMPTY"){
                         wwseq = wwseq+it.selectedItem+"_raspberry-pi.ppn+"
@@ -302,7 +302,7 @@ class Wakeword : AppCompatActivity() {
                 }else if (type.selectedItem == "SELECT ACTION"){
                     Toast.makeText(this, "Select an action for this device", Toast.LENGTH_SHORT).show()
                 } else {
-                    var wwseq = "U,portww,"+devtype.selectedItem+","+type.selectedItem+","
+                    var wwseq = "U,ww,EDIT,"+devtype.selectedItem+","+type.selectedItem+","
                     wwstype.forEach {
                         if(it.selectedItem != "EMPTY"){
                             wwseq = wwseq+it.selectedItem+"_raspberry-pi.ppn+"
