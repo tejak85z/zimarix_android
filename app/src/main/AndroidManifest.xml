@@ -25,6 +25,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Zimarix_1">
         <activity
+            android:name=".Remote"
+            android:exported="false" />
+        <activity
             android:name=".Wakeword"
             android:exported="false" />
         <activity

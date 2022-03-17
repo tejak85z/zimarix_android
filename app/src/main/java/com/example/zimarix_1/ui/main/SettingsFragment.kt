@@ -3,10 +3,13 @@ package com.example.zimarix_1.ui.main
 import android.R
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.os.StrictMode
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
@@ -52,7 +55,7 @@ class SettingsFragment : Fragment() {
                 var ports=arrayOf<String>()
                 dev_config.forEach{
                     val port = it.split(",")
-                    if (port.size == 7 && port[0]=="port") {
+                    if (port.size == 7 && port[0]=="port" && port[1].toInt() < 32) {
                         ports = ports + it
                         pioneers = pioneers + port[2]
                     }
@@ -104,8 +107,22 @@ class SettingsFragment : Fragment() {
                 })
             }
             else if (it == "3") {
-                pioneers = zimarix_global.controller_ips.toTypedArray()
+                var ports=arrayOf<String>()
+                pioneers = pioneers + "ADD NEW REMOTE".split(",")
+                dev_config.forEach{
+                    val port = it.split(",")
+                    if (port.size == 7 && port[0]=="port" && port[1].toInt() >= 32) {
+                        ports = ports + it
+                        pioneers = pioneers + port[2]
+                    }
+                }
                 listView.setOnItemClickListener(AdapterView.OnItemClickListener { arg0, arg1, position, arg3 ->
+
+                    if (position == 0) {
+                        add_new_remote()
+                    }else{
+                        show_remote(ports[position-1])
+                    }
                 })
             }
             val adapter = activity?.let {
@@ -145,6 +162,151 @@ class SettingsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding1 = null
+    }
+
+    fun show_remote(data:String){
+        Toast.makeText(context, data, Toast.LENGTH_SHORT).show()
+        //val intent = Intent(getActivity(), Remote::class.java)
+        //startActivity(intent)
+        val param = data.split(",")
+        show_ac_remote(param[2])
+    }
+
+    fun add_button(name : String, dev: String, state : Int): Button {
+        val on = Button(context)
+        on.setSingleLine()
+        on.setText(name)
+        on.setBackgroundColor(Color.rgb(200, 198, 255))
+
+        on.setOnClickListener(){
+            if (state == 0) {
+                Toast.makeText(context, "Clicked " + name, Toast.LENGTH_SHORT).show()
+                val req = "I,IR,"+dev+","+name+",I"
+                encrypt_and_send_data(req)
+            }else {
+
+            }
+        }
+        on.setOnLongClickListener(){
+            if (state == 1) {
+                Toast.makeText(context, "Clicked " + name, Toast.LENGTH_SHORT).show()
+                val req = "I,IR,"+dev+","+name+",R"
+                val ret = encrypt_and_send_data(req)
+                Toast.makeText(context, ret, Toast.LENGTH_SHORT).show()
+                on.setBackgroundColor(Color.rgb(10, 198, 255))
+            }else {
+                val layout = LinearLayout(context)
+                layout.orientation = LinearLayout.VERTICAL
+
+                layout.setPadding(50, 40, 50, 10)
+
+                val builder = AlertDialog.Builder(context)
+                    .setTitle(dev + " "+name+" configure")
+                    .setView(layout)
+                    .setNeutralButton("DELETE RECORD",null)
+                    .setPositiveButton("RE-RECORD", null)
+                    .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
+                        // so something, or not - dialog will close
+                        dialog.dismiss()
+                    }
+                val dialog = builder.create()
+
+                dialog.setOnShowListener {
+                    val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                    okButton.setOnClickListener {
+                        val req = "I,IR,"+dev+","+name+",R"
+                        encrypt_and_send_data(req)
+                    }
+                    val nutralButton = dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
+                    nutralButton.setOnClickListener {
+                        val req = "I,IR,"+dev+","+name+",D"
+                        encrypt_and_send_data(req)
+                    }
+                }
+                dialog.show()
+
+            }
+            /*on.setOnTouchListener(object : View.OnTouchListener {
+                override fun onTouch(p0: View?, ev: MotionEvent?): Boolean {
+                    if (ev!!.action == MotionEvent.ACTION_DOWN){
+                        on.setBackgroundColor(Color.rgb(10, 198, 255))
+
+                    }else if (ev!!.action == MotionEvent.ACTION_UP){
+                        on.setBackgroundColor(Color.rgb(200, 198, 255))
+                    }
+                    return true
+                }
+            })
+             */
+            return@setOnLongClickListener(true)
+        }
+        return on
+    }
+
+    fun show_ac_remote(dev:String){
+        val layout = LinearLayout(context)
+        layout.orientation = LinearLayout.VERTICAL
+        // ON + OFF
+        val hlayout1 = LinearLayout(context)
+        hlayout1.orientation = LinearLayout.HORIZONTAL
+        val on = add_button("ON",dev,0)
+        hlayout1.addView(on)
+        val off = add_button("OFF",dev,0)
+        hlayout1.addView(off)
+        layout.addView(hlayout1)
+
+        //Temperatures txt
+        val tmpt = TextView(context)
+        tmpt.setText("Temperature")
+        tmpt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        tmpt.setTextColor(Color.BLUE)
+        layout.addView(tmpt)
+        //Temperatures buttons 16 to 20
+        val hlayout2 = LinearLayout(context)
+        hlayout2.orientation = LinearLayout.HORIZONTAL
+        val t16 = add_button("16",dev,0)
+        hlayout2.addView(t16)
+        val t17 = add_button("17",dev,0)
+        hlayout2.addView(t17)
+        val t18 = add_button("18",dev,0)
+        hlayout2.addView(t18)
+        val t19 = add_button("19",dev,0)
+        hlayout2.addView(t19)
+        val t20 = add_button("20",dev,0)
+        hlayout2.addView(t20)
+        layout.addView(hlayout2)
+
+
+        //Temperatures buttons 21 to 25
+        val hlayout3 = LinearLayout(context)
+        hlayout3.orientation = LinearLayout.HORIZONTAL
+        val t21 = add_button("21",dev,0)
+        hlayout3.addView(t21)
+        val t22 = add_button("22",dev,0)
+        hlayout3.addView(t22)
+        val t23 = add_button("23",dev,0)
+        hlayout3.addView(t23)
+        val t24 = add_button("24",dev,0)
+        hlayout3.addView(t24)
+        val t25 = add_button("25",dev,0)
+        hlayout3.addView(t25)
+        layout.addView(hlayout3)
+
+        layout.setPadding(50, 40, 50, 10)
+
+        val builder = AlertDialog.Builder(context)
+            .setTitle(dev + " REMOTE")
+            .setView(layout)
+            .setPositiveButton("DONE", null)
+            .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
+                // so something, or not - dialog will close
+                dialog.dismiss()
+            }
+        val dialog = builder.create()
+
+        dialog.setOnShowListener {
+        }
+        dialog.show()
     }
 
     fun set_port_params(idx : Int, port:List<String>){
@@ -249,6 +411,64 @@ class SettingsFragment : Fragment() {
             val nutralButton = dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
             nutralButton.setOnClickListener {
                 Toast.makeText(context, "Switching on and off Port " + idx, Toast.LENGTH_SHORT).show()
+            }
+        }
+        dialog.show()
+    }
+
+    fun add_new_remote(){
+        val layout = LinearLayout(context)
+        layout.orientation = LinearLayout.VERTICAL
+
+        val remote_name = EditText(context)
+        remote_name.setSingleLine()
+        remote_name.hint = "Remote Name"
+        layout.addView(remote_name)
+
+        val remotetype = "SELECT REMOTE TYPE,AC, TV, REMOTE SWITCH, REMOTE SMART LIGHT, REMOTE SMART FAN, AUDIO DEVICE".split(",")
+        val type = Spinner(context)
+        type.adapter =
+            context?.let { ArrayAdapter(it, android.R.layout.simple_spinner_dropdown_item, remotetype) }
+        layout.addView(type)
+
+        layout.setPadding(50, 40, 50, 10)
+
+        val builder = AlertDialog.Builder(context)
+            .setTitle("ADDING NEW REMOTE")
+            .setView(layout)
+            .setPositiveButton("ADD", null)
+            .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
+                // so something, or not - dialog will close
+                dialog.dismiss()
+            }
+        val dialog = builder.create()
+
+        dialog.setOnShowListener {
+            val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            okButton.setOnClickListener {
+                var req = "U,IR,add,"
+                var err = ""
+                if(remote_name.text.isNotBlank()){
+                    req = req + remote_name.text.toString()
+                }else
+                    err= "Enter Valid name for the new remote"
+                var i = 10;
+                for(item in remotetype){
+                    if(item == type.selectedItem)
+                        break
+                    i = i + 1
+                }
+                if (i > 10)
+                    req = req + "," + i.toString()
+                else if (err.length <= 1)
+                    err = "Select Remote Type"
+
+                if (err.length <= 1) {
+                    val resp = encrypt_and_send_data(req)
+                    Toast.makeText(context, resp, Toast.LENGTH_SHORT).show()
+                    if (resp == "OK")
+                        dialog.dismiss()
+                }
             }
         }
         dialog.show()
