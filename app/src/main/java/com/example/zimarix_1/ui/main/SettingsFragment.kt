@@ -9,7 +9,6 @@ import android.os.StrictMode
 import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
@@ -124,6 +123,29 @@ class SettingsFragment : Fragment() {
                         show_remote(ports[position-1])
                     }
                 })
+                listView.setOnItemLongClickListener { parent, view, position, id ->
+                    val param = ports[position-1].split(",")
+                     if (position != 0) {
+                         val builder = AlertDialog.Builder(context)
+                             .setTitle(param[2] + " control")
+                             .setPositiveButton("Delete " + param[2], null)
+                             .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
+                                 // so something, or not - dialog will close
+                                 dialog.dismiss()
+                             }
+                         val dialog = builder.create()
+                         dialog.setOnShowListener {
+                             val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                             okButton.setOnClickListener {
+                                 val req = "U,IR,del,"+param[1] //delete device
+                                 encrypt_and_send_data(req)
+                                 dialog.dismiss()
+                             }
+                         }
+                         dialog.show()
+                    }
+                    return@setOnItemLongClickListener(true)
+                }
             }
             val adapter = activity?.let {
                 ArrayAdapter<String>(
@@ -165,93 +187,564 @@ class SettingsFragment : Fragment() {
     }
 
     fun show_remote(data:String){
-        Toast.makeText(context, data, Toast.LENGTH_SHORT).show()
         //val intent = Intent(getActivity(), Remote::class.java)
         //startActivity(intent)
         val param = data.split(",")
-        show_ac_remote(param[2])
+
+        val ir_dev_req = "I,IR,"+param[1]+",GET"
+        val ir_dev_info = encrypt_and_send_data(ir_dev_req)
+        Toast.makeText(context, ir_dev_info, Toast.LENGTH_SHORT).show()
+
+        if(param[4] == "11") {
+            show_ac_remote(param[1], param[2], ir_dev_info)
+        }else if(param[4] == "12") {
+            show_tv_remote(param[1], param[2], ir_dev_info)
+        }else if(param[4] == "13") {
+            show_remote_switch(param[1], param[2], ir_dev_info)
+        }else if(param[4] == "14") {
+            show_remote_smart_light(param[1], param[2], ir_dev_info)
+        }else if(param[4] == "15") {
+            show_remote_smart_fan(param[1], param[2], ir_dev_info)
+        }else if(param[4] == "16") {
+            show_player_remote(param[1], param[2], ir_dev_info)
+        }
     }
 
-    fun add_button(name : String, dev: String, state : Int): Button {
+    fun show_player_remote(dev_id:String, dev : String, dev_info : String){
+        val curr_btns = dev_info.split(",")
+        if (curr_btns[0] != "keys")
+            return
+
+        val layout = LinearLayout(context)
+        layout.orientation = LinearLayout.VERTICAL
+
+
+        // ON + OFF
+        val hlayout1 = LinearLayout(context)
+        hlayout1.orientation = LinearLayout.HORIZONTAL
+
+        val on = add_button("ON", dev, check_state(curr_btns,"ON"),dev_id)
+        hlayout1.addView(on)
+        val off = add_button("OFF",dev,check_state(curr_btns,"OFF"),dev_id)
+        hlayout1.addView(off)
+        layout.addView(hlayout1)
+
+        val hlayout5 = LinearLayout(context)
+        hlayout5.orientation = LinearLayout.HORIZONTAL
+        val mute = add_button("mute",dev,check_state(curr_btns,"mute"),dev_id)
+        hlayout5.addView(mute)
+        val pause = add_button("pause",dev,check_state(curr_btns,"pause"),dev_id)
+        hlayout5.addView(pause)
+        val play = add_button("play",dev,check_state(curr_btns,"play"),dev_id)
+        hlayout5.addView(play)
+        layout.addView(hlayout5)
+
+        val ctrl = TextView(context)
+        ctrl.setText("CONTROL")
+        //txt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        //txt.setTextColor(Color.BLUE)
+        layout.addView(ctrl)
+        val up = add_button("UP",dev,check_state(curr_btns,"UP"),dev_id)
+        layout.addView(up)
+        val hlayout6 = LinearLayout(context)
+        hlayout6.orientation = LinearLayout.HORIZONTAL
+        val prev = add_button("PREV",dev,check_state(curr_btns,"PREV"),dev_id)
+        hlayout6.addView(prev)
+        val ok = add_button("OK",dev,check_state(curr_btns,"OK"),dev_id)
+        hlayout6.addView(ok)
+        val next = add_button("NEXT",dev,check_state(curr_btns,"NEXT"),dev_id)
+        hlayout6.addView(next)
+        layout.addView(hlayout6)
+        val down = add_button("DOWN",dev,check_state(curr_btns,"DOWN"),dev_id)
+        layout.addView(down)
+
+        val hlayout7 = LinearLayout(context)
+        hlayout7.orientation = LinearLayout.HORIZONTAL
+        val i3 = add_button("USB",dev,check_state(curr_btns,"USB"),dev_id)
+        hlayout7.addView(i3)
+        val i4 = add_button("input 0",dev,check_state(curr_btns,"input 0"),dev_id)
+        hlayout7.addView(i4)
+        val i5 = add_button("input 1",dev,check_state(curr_btns,"input 1"),dev_id)
+        hlayout7.addView(i5)
+        layout.addView(hlayout7)
+
+        //Volume up down buttens
+        val vol = TextView(context)
+        vol.setText("Volume")
+        //txt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        //txt.setTextColor(Color.BLUE)
+        layout.addView(vol)
+        val volup = add_button("+VOLUP",dev,check_state(curr_btns,"VOLUP"),dev_id)
+        layout.addView(volup)
+        val voldown = add_button("-VOLDOWN",dev,check_state(curr_btns,"VOLDOWN"),dev_id)
+        layout.addView(voldown)
+
+        layout.setPadding(50, 40, 50, 10)
+
+        val builder = AlertDialog.Builder(context)
+            .setTitle(dev + " (TV) REMOTE")
+            .setView(layout)
+            .setPositiveButton("DONE", null)
+            .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
+                // so something, or not - dialog will close
+                dialog.dismiss()
+            }
+        val dialog = builder.create()
+
+        dialog.setOnShowListener {
+        }
+        dialog.show()
+    }
+
+    fun show_remote_smart_fan(dev_id:String, dev : String, dev_info : String){
+        val curr_btns = dev_info.split(",")
+        if (curr_btns[0] != "keys")
+            return
+
+        val layout = LinearLayout(context)
+        layout.orientation = LinearLayout.VERTICAL
+
+
+        // ON + OFF
+        val hlayout1 = LinearLayout(context)
+        hlayout1.orientation = LinearLayout.HORIZONTAL
+
+        val on = add_button("ON", dev, check_state(curr_btns,"ON"),dev_id)
+        hlayout1.addView(on)
+        val off = add_button("OFF",dev,check_state(curr_btns,"OFF"),dev_id)
+        hlayout1.addView(off)
+        layout.addView(hlayout1)
+
+        //Temperatures txt
+        val tmpt = TextView(context)
+        tmpt.setText("FAN SPEEDS")
+        tmpt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        tmpt.setTextColor(Color.BLUE)
+        layout.addView(tmpt)
+        //Speeds between 1 and 5
+        val hlayout2 = LinearLayout(context)
+        hlayout2.orientation = LinearLayout.HORIZONTAL
+        val t1 = add_button("1",dev,check_state(curr_btns,"1"),dev_id)
+        hlayout2.addView(t1)
+        val t2 = add_button("2",dev,check_state(curr_btns,"2"),dev_id)
+        hlayout2.addView(t2)
+        val t3 = add_button("3",dev,check_state(curr_btns,"3"),dev_id)
+        hlayout2.addView(t3)
+        val t4 = add_button("4",dev,check_state(curr_btns,"4"),dev_id)
+        hlayout2.addView(t4)
+        val t5 = add_button("5",dev,check_state(curr_btns,"5"),dev_id)
+        hlayout2.addView(t5)
+        layout.addView(hlayout2)
+
+
+        // fan speeds up down
+        val fantxt = TextView(context)
+        fantxt.setText("Fan Speed")
+        //txt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        //txt.setTextColor(Color.BLUE)
+        layout.addView(fantxt)
+        val fanup = add_button("+FANUP",dev,check_state(curr_btns,"FANUP"),dev_id)
+        layout.addView(fanup)
+        val fandown = add_button("-FANDOWN",dev,check_state(curr_btns,"FANDOWN"),dev_id)
+        layout.addView(fandown)
+
+        layout.setPadding(50, 40, 50, 10)
+
+        val builder = AlertDialog.Builder(context)
+            .setTitle(dev + " (SMART FAN) REMOTE")
+            .setView(layout)
+            .setPositiveButton("DONE", null)
+            .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
+                // so something, or not - dialog will close
+                dialog.dismiss()
+            }
+        val dialog = builder.create()
+
+        dialog.setOnShowListener {
+        }
+        dialog.show()
+    }
+
+    fun add_button(value : String, dev: String, state : Int, dev_id: String): Button {
         val on = Button(context)
         on.setSingleLine()
-        on.setText(name)
-        on.setBackgroundColor(Color.rgb(200, 198, 255))
+        var name = value
+        if (value[0] == '+' || value[0] == '-') {
+            on.setText(value[0].toString())
+            name = name.drop(1)
+        }else
+            on.setText(name)
+        if(state == 1)
+            on.setBackgroundColor(Color.rgb(200, 198, 255))
+        else
+            on.setBackgroundColor(Color.rgb(255, 198, 255))
 
         on.setOnClickListener(){
-            if (state == 0) {
-                Toast.makeText(context, "Clicked " + name, Toast.LENGTH_SHORT).show()
-                val req = "I,IR,"+dev+","+name+",I"
-                encrypt_and_send_data(req)
-            }else {
-
-            }
-        }
-        on.setOnLongClickListener(){
             if (state == 1) {
                 Toast.makeText(context, "Clicked " + name, Toast.LENGTH_SHORT).show()
-                val req = "I,IR,"+dev+","+name+",R"
-                val ret = encrypt_and_send_data(req)
-                Toast.makeText(context, ret, Toast.LENGTH_SHORT).show()
-                on.setBackgroundColor(Color.rgb(10, 198, 255))
+                val req = "I,IR,"+dev_id+","+name+",I"
+                encrypt_and_send_data(req)
             }else {
-                val layout = LinearLayout(context)
-                layout.orientation = LinearLayout.VERTICAL
-
-                layout.setPadding(50, 40, 50, 10)
-
                 val builder = AlertDialog.Builder(context)
-                    .setTitle(dev + " "+name+" configure")
-                    .setView(layout)
-                    .setNeutralButton("DELETE RECORD",null)
-                    .setPositiveButton("RE-RECORD", null)
+                    .setTitle(dev + " "+name+" Not Recorded")
+                    .setPositiveButton("RECORD", null)
                     .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
                         // so something, or not - dialog will close
                         dialog.dismiss()
                     }
                 val dialog = builder.create()
-
                 dialog.setOnShowListener {
                     val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
                     okButton.setOnClickListener {
-                        val req = "I,IR,"+dev+","+name+",R"
+                        val req = "I,IR,"+dev_id+","+name+",R"
                         encrypt_and_send_data(req)
-                    }
-                    val nutralButton = dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
-                    nutralButton.setOnClickListener {
-                        val req = "I,IR,"+dev+","+name+",D"
-                        encrypt_and_send_data(req)
+                        dialog.dismiss()
                     }
                 }
                 dialog.show()
-
             }
-            /*on.setOnTouchListener(object : View.OnTouchListener {
-                override fun onTouch(p0: View?, ev: MotionEvent?): Boolean {
-                    if (ev!!.action == MotionEvent.ACTION_DOWN){
-                        on.setBackgroundColor(Color.rgb(10, 198, 255))
+        }
+        on.setOnLongClickListener(){
+            val layout = LinearLayout(context)
+            layout.orientation = LinearLayout.VERTICAL
 
-                    }else if (ev!!.action == MotionEvent.ACTION_UP){
-                        on.setBackgroundColor(Color.rgb(200, 198, 255))
-                    }
-                    return true
+            val cncl = Button(context)
+            cncl.setText("Stop Recording")
+            cncl.setBackgroundColor(Color.rgb(200, 198, 255))
+            layout.addView(cncl)
+            layout.setPadding(50, 40, 50, 10)
+
+            val builder = AlertDialog.Builder(context)
+                .setTitle(dev + " "+name+" configure")
+                .setView(layout)
+                .setNeutralButton("DELETE ALL",null)
+                .setPositiveButton("Continue Recording", null)
+                .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
+                    // so something, or not - dialog will close
+                    dialog.dismiss()
                 }
-            })
-             */
+            val dialog = builder.create()
+
+            dialog.setOnShowListener {
+                val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                okButton.setOnClickListener {
+                    val req = "I,IR,"+dev_id+","+name+",R"
+                    encrypt_and_send_data(req)
+                    dialog.dismiss()
+                }
+                val nutralButton = dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
+                nutralButton.setOnClickListener {
+                    val req = "I,IR,"+dev_id+","+name+",D"
+                    encrypt_and_send_data(req)
+                    dialog.dismiss()
+                }
+            }
+            dialog.show()
+            cncl.setOnClickListener(){
+                val req = "I,IR,STOPREC"
+                encrypt_and_send_data(req)
+                dialog.dismiss()
+            }
             return@setOnLongClickListener(true)
         }
         return on
     }
 
-    fun show_ac_remote(dev:String){
+    fun check_state(curr_btns: List<String>, act:String):Int{
+        if(curr_btns.contains(act)) {
+            return 1
+        } else {
+            return 0
+        }
+        return -1
+    }
+
+
+    fun show_remote_smart_light(dev_id:String, dev : String, dev_info : String){
+        val curr_btns = dev_info.split(",")
+        if (curr_btns[0] != "keys")
+            return
+
         val layout = LinearLayout(context)
         layout.orientation = LinearLayout.VERTICAL
+
+
         // ON + OFF
         val hlayout1 = LinearLayout(context)
         hlayout1.orientation = LinearLayout.HORIZONTAL
-        val on = add_button("ON",dev,0)
+
+        val on = add_button("ON", dev, check_state(curr_btns,"ON"),dev_id)
         hlayout1.addView(on)
-        val off = add_button("OFF",dev,0)
+        val off = add_button("OFF",dev,check_state(curr_btns,"OFF"),dev_id)
+        hlayout1.addView(off)
+        layout.addView(hlayout1)
+
+        //colors txt
+        val tmpt = TextView(context)
+        tmpt.setText("COLORS")
+        tmpt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        tmpt.setTextColor(Color.BLUE)
+        layout.addView(tmpt)
+        //light colors
+        val hlayout2 = LinearLayout(context)
+        hlayout2.orientation = LinearLayout.HORIZONTAL
+        val red = add_button("red",dev,check_state(curr_btns,"red"),dev_id)
+        hlayout2.addView(red)
+        val blue = add_button("blue",dev,check_state(curr_btns,"blue"),dev_id)
+        hlayout2.addView(blue)
+        val green = add_button("green",dev,check_state(curr_btns,"green"),dev_id)
+        hlayout2.addView(green)
+        val yellow = add_button("yellow",dev,check_state(curr_btns,"yellow"),dev_id)
+        hlayout2.addView(yellow)
+        val orange = add_button("orange",dev,check_state(curr_btns,"orange"),dev_id)
+        hlayout2.addView(orange)
+        layout.addView(hlayout2)
+
+
+        //light colors
+        val hlayout3 = LinearLayout(context)
+        hlayout3.orientation = LinearLayout.HORIZONTAL
+        val purple = add_button("purple",dev,check_state(curr_btns,"purple"),dev_id)
+        hlayout3.addView(purple)
+        val violet = add_button("violet",dev,check_state(curr_btns,"violet"),dev_id)
+        hlayout3.addView(violet)
+        val skyblue = add_button("skyblue",dev,check_state(curr_btns,"skyblue"),dev_id)
+        hlayout3.addView(skyblue)
+        val pink = add_button("pink",dev,check_state(curr_btns,"pink"),dev_id)
+        hlayout3.addView(pink)
+        val white = add_button("white",dev,check_state(curr_btns,"white"),dev_id)
+        hlayout3.addView(white)
+        layout.addView(hlayout3)
+
+        val hlayout5 = LinearLayout(context)
+        hlayout5.orientation = LinearLayout.HORIZONTAL
+        val mode0 = add_button("mode0",dev,check_state(curr_btns,"mode0"),dev_id)
+        hlayout5.addView(mode0)
+        val mode1 = add_button("mode1",dev,check_state(curr_btns,"mode1"),dev_id)
+        hlayout5.addView(mode1)
+        val mode2 = add_button("mode2",dev,check_state(curr_btns,"mode2"),dev_id)
+        hlayout5.addView(mode2)
+        val mode3 = add_button("mode3",dev,check_state(curr_btns,"mode3"),dev_id)
+        hlayout5.addView(mode3)
+        val mode4 = add_button("mode4",dev,check_state(curr_btns,"mode4"),dev_id)
+        hlayout5.addView(mode4)
+        layout.addView(hlayout5)
+
+        //brightness up down buttens
+        val temptxt = TextView(context)
+        temptxt.setText("BRIGHTNESS")
+        //txt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        //txt.setTextColor(Color.BLUE)
+        layout.addView(temptxt)
+        val brtup = add_button("+BRTUP",dev,check_state(curr_btns,"BRTUP"),dev_id)
+        layout.addView(brtup)
+        val brtdown = add_button("-BRTDOWN",dev,check_state(curr_btns,"BRTDOWN"),dev_id)
+        layout.addView(brtdown)
+
+
+        layout.setPadding(50, 40, 50, 10)
+
+        val builder = AlertDialog.Builder(context)
+            .setTitle(dev + " SMART LIGHT REMOTE")
+            .setView(layout)
+            .setPositiveButton("DONE", null)
+            .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
+                // so something, or not - dialog will close
+                dialog.dismiss()
+            }
+        val dialog = builder.create()
+
+        dialog.setOnShowListener {
+        }
+        dialog.show()
+    }
+
+    fun show_remote_switch(dev_id:String, dev : String, dev_info : String){
+        val curr_btns = dev_info.split(",")
+        if (curr_btns[0] != "keys")
+            return
+
+        val layout = LinearLayout(context)
+        layout.orientation = LinearLayout.VERTICAL
+
+
+        // ON + OFF
+        val hlayout1 = LinearLayout(context)
+        hlayout1.orientation = LinearLayout.HORIZONTAL
+
+        val on = add_button("ON", dev, check_state(curr_btns,"ON"),dev_id)
+        hlayout1.addView(on)
+        val off = add_button("OFF",dev,check_state(curr_btns,"OFF"),dev_id)
+        hlayout1.addView(off)
+        layout.addView(hlayout1)
+
+        layout.setPadding(50, 40, 50, 10)
+
+        val builder = AlertDialog.Builder(context)
+            .setTitle(dev + " REMOTE SWITCH")
+            .setView(layout)
+            .setPositiveButton("DONE", null)
+            .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
+                // so something, or not - dialog will close
+                dialog.dismiss()
+            }
+        val dialog = builder.create()
+
+        dialog.setOnShowListener {
+        }
+        dialog.show()
+    }
+
+    fun show_tv_remote(dev_id:String, dev : String, dev_info : String){
+        val curr_btns = dev_info.split(",")
+        if (curr_btns[0] != "keys")
+            return
+
+        val layout = LinearLayout(context)
+        layout.orientation = LinearLayout.VERTICAL
+
+
+        // ON + OFF
+        val hlayout1 = LinearLayout(context)
+        hlayout1.orientation = LinearLayout.HORIZONTAL
+
+        val on = add_button("ON", dev, check_state(curr_btns,"ON"),dev_id)
+        hlayout1.addView(on)
+        val off = add_button("OFF",dev,check_state(curr_btns,"OFF"),dev_id)
+        hlayout1.addView(off)
+        layout.addView(hlayout1)
+
+        //numbers txt
+        val tmpt = TextView(context)
+        tmpt.setText("CHANNEL")
+        tmpt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        tmpt.setTextColor(Color.BLUE)
+        layout.addView(tmpt)
+        //channel number 1 to 3
+        val hlayout2 = LinearLayout(context)
+        hlayout2.orientation = LinearLayout.HORIZONTAL
+        val t1 = add_button("1",dev,check_state(curr_btns,"1"),dev_id)
+        hlayout2.addView(t1)
+        val t2 = add_button("2",dev,check_state(curr_btns,"2"),dev_id)
+        hlayout2.addView(t2)
+        val t3 = add_button("3",dev,check_state(curr_btns,"3"),dev_id)
+        hlayout2.addView(t3)
+        layout.addView(hlayout2)
+
+
+        //channel number 4 to 6
+        val hlayout3 = LinearLayout(context)
+        hlayout3.orientation = LinearLayout.HORIZONTAL
+        val t4 = add_button("4",dev,check_state(curr_btns,"4"),dev_id)
+        hlayout3.addView(t4)
+        val t5 = add_button("5",dev,check_state(curr_btns,"5"),dev_id)
+        hlayout3.addView(t5)
+        val t6 = add_button("6",dev,check_state(curr_btns,"6"),dev_id)
+        hlayout3.addView(t6)
+        layout.addView(hlayout3)
+
+        //channel number 7 to 9, 0
+        val hlayout4 = LinearLayout(context)
+        hlayout4.orientation = LinearLayout.HORIZONTAL
+        val t7 = add_button("7",dev,check_state(curr_btns,"7"),dev_id)
+        hlayout4.addView(t7)
+        val t8 = add_button("8",dev,check_state(curr_btns,"8"),dev_id)
+        hlayout4.addView(t8)
+        val t9 = add_button("9",dev,check_state(curr_btns,"9"),dev_id)
+        hlayout4.addView(t9)
+        val t0 = add_button("0",dev,check_state(curr_btns,"0"),dev_id)
+        hlayout4.addView(t0)
+        layout.addView(hlayout4)
+
+        val hlayout5 = LinearLayout(context)
+        hlayout5.orientation = LinearLayout.HORIZONTAL
+        val mute = add_button("mute",dev,check_state(curr_btns,"mute"),dev_id)
+        hlayout5.addView(mute)
+        val pause = add_button("pause",dev,check_state(curr_btns,"pause"),dev_id)
+        hlayout5.addView(pause)
+        val play = add_button("play",dev,check_state(curr_btns,"play"),dev_id)
+        hlayout5.addView(play)
+        layout.addView(hlayout5)
+
+        val hlayout6 = LinearLayout(context)
+        hlayout6.orientation = LinearLayout.HORIZONTAL
+        val home = add_button("home",dev,check_state(curr_btns,"home"),dev_id)
+        hlayout6.addView(home)
+        val ok = add_button("ok",dev,check_state(curr_btns,"ok"),dev_id)
+        hlayout6.addView(ok)
+        val info = add_button("info",dev,check_state(curr_btns,"info"),dev_id)
+        hlayout6.addView(info)
+        layout.addView(hlayout6)
+
+        val hlayout7 = LinearLayout(context)
+        hlayout7.orientation = LinearLayout.HORIZONTAL
+        val i1 = add_button("AV",dev,check_state(curr_btns,"AV"),dev_id)
+        hlayout7.addView(i1)
+        val i2 = add_button("HDMI",dev,check_state(curr_btns,"HDMI"),dev_id)
+        hlayout7.addView(i2)
+        val i3 = add_button("USB",dev,check_state(curr_btns,"USB"),dev_id)
+        hlayout7.addView(i3)
+        val i4 = add_button("input 0",dev,check_state(curr_btns,"input 0"),dev_id)
+        hlayout7.addView(i4)
+        val i5 = add_button("input 1",dev,check_state(curr_btns,"input 1"),dev_id)
+        hlayout7.addView(i5)
+        layout.addView(hlayout7)
+
+        //Volume up down buttens
+        val vol = TextView(context)
+        vol.setText("Volume")
+        //txt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        //txt.setTextColor(Color.BLUE)
+        layout.addView(vol)
+        val volup = add_button("+VOLUP",dev,check_state(curr_btns,"VOLUP"),dev_id)
+        layout.addView(volup)
+        val voldown = add_button("-VOLDOWN",dev,check_state(curr_btns,"VOLDOWN"),dev_id)
+        layout.addView(voldown)
+
+        //CHANNEL up down buttens
+        val chantxt = TextView(context)
+        chantxt.setText("CHANNEL")
+        //txt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        //txt.setTextColor(Color.BLUE)
+        layout.addView(chantxt)
+        val chanup = add_button("+CHANUP",dev,check_state(curr_btns,"CHANUP"),dev_id)
+        layout.addView(chanup)
+        val chandown = add_button("-CHANDOWN",dev,check_state(curr_btns,"CHANDOWN"),dev_id)
+        layout.addView(chandown)
+
+        layout.setPadding(50, 40, 50, 10)
+
+        val builder = AlertDialog.Builder(context)
+            .setTitle(dev + " (TV) REMOTE")
+            .setView(layout)
+            .setPositiveButton("DONE", null)
+            .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
+                // so something, or not - dialog will close
+                dialog.dismiss()
+            }
+        val dialog = builder.create()
+
+        dialog.setOnShowListener {
+        }
+        dialog.show()
+    }
+
+    fun show_ac_remote(dev_id:String, dev : String, dev_info : String){
+        val curr_btns = dev_info.split(",")
+        if (curr_btns[0] != "keys")
+            return
+
+        val layout = LinearLayout(context)
+        layout.orientation = LinearLayout.VERTICAL
+
+
+        // ON + OFF
+        val hlayout1 = LinearLayout(context)
+        hlayout1.orientation = LinearLayout.HORIZONTAL
+
+        val on = add_button("ON", dev, check_state(curr_btns,"ON"),dev_id)
+        hlayout1.addView(on)
+        val off = add_button("OFF",dev,check_state(curr_btns,"OFF"),dev_id)
         hlayout1.addView(off)
         layout.addView(hlayout1)
 
@@ -264,15 +757,15 @@ class SettingsFragment : Fragment() {
         //Temperatures buttons 16 to 20
         val hlayout2 = LinearLayout(context)
         hlayout2.orientation = LinearLayout.HORIZONTAL
-        val t16 = add_button("16",dev,0)
+        val t16 = add_button("16",dev,check_state(curr_btns,"16"),dev_id)
         hlayout2.addView(t16)
-        val t17 = add_button("17",dev,0)
+        val t17 = add_button("17",dev,check_state(curr_btns,"17"),dev_id)
         hlayout2.addView(t17)
-        val t18 = add_button("18",dev,0)
+        val t18 = add_button("18",dev,check_state(curr_btns,"18"),dev_id)
         hlayout2.addView(t18)
-        val t19 = add_button("19",dev,0)
+        val t19 = add_button("19",dev,check_state(curr_btns,"19"),dev_id)
         hlayout2.addView(t19)
-        val t20 = add_button("20",dev,0)
+        val t20 = add_button("20",dev,check_state(curr_btns,"20"),dev_id)
         hlayout2.addView(t20)
         layout.addView(hlayout2)
 
@@ -280,17 +773,79 @@ class SettingsFragment : Fragment() {
         //Temperatures buttons 21 to 25
         val hlayout3 = LinearLayout(context)
         hlayout3.orientation = LinearLayout.HORIZONTAL
-        val t21 = add_button("21",dev,0)
+        val t21 = add_button("21",dev,check_state(curr_btns,"21"),dev_id)
         hlayout3.addView(t21)
-        val t22 = add_button("22",dev,0)
+        val t22 = add_button("22",dev,check_state(curr_btns,"22"),dev_id)
         hlayout3.addView(t22)
-        val t23 = add_button("23",dev,0)
+        val t23 = add_button("23",dev,check_state(curr_btns,"23"),dev_id)
         hlayout3.addView(t23)
-        val t24 = add_button("24",dev,0)
+        val t24 = add_button("24",dev,check_state(curr_btns,"24"),dev_id)
         hlayout3.addView(t24)
-        val t25 = add_button("25",dev,0)
+        val t25 = add_button("25",dev,check_state(curr_btns,"25"),dev_id)
         hlayout3.addView(t25)
         layout.addView(hlayout3)
+
+         //Temperatures buttons 26 to 30
+        val hlayout4 = LinearLayout(context)
+        hlayout4.orientation = LinearLayout.HORIZONTAL
+        val t26 = add_button("26",dev,check_state(curr_btns,"26"),dev_id)
+        hlayout4.addView(t26)
+        val t27 = add_button("27",dev,check_state(curr_btns,"27"),dev_id)
+        hlayout4.addView(t27)
+        val t28 = add_button("28",dev,check_state(curr_btns,"28"),dev_id)
+        hlayout4.addView(t28)
+        val t29 = add_button("29",dev,check_state(curr_btns,"29"),dev_id)
+        hlayout4.addView(t29)
+        val t30 = add_button("30",dev,check_state(curr_btns,"30"),dev_id)
+        hlayout4.addView(t30)
+        layout.addView(hlayout4)
+
+        val hlayout5 = LinearLayout(context)
+        hlayout5.orientation = LinearLayout.HORIZONTAL
+        val swing = add_button("swing",dev,check_state(curr_btns,"swing"),dev_id)
+        hlayout5.addView(swing)
+        val mode1 = add_button("mode1",dev,check_state(curr_btns,"mode1"),dev_id)
+        hlayout5.addView(mode1)
+        val mode2 = add_button("mode2",dev,check_state(curr_btns,"mode2"),dev_id)
+        hlayout5.addView(mode2)
+        val mode3 = add_button("mode3",dev,check_state(curr_btns,"mode3"),dev_id)
+        hlayout5.addView(mode3)
+        val mode4 = add_button("mode4",dev,check_state(curr_btns,"mode4"),dev_id)
+        hlayout5.addView(mode4)
+        layout.addView(hlayout5)
+
+        //Temperatures up down buttens
+        val temptxt = TextView(context)
+        temptxt.setText("Temperature")
+        //txt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        //txt.setTextColor(Color.BLUE)
+        layout.addView(temptxt)
+        val tmpup = add_button("+TMPUP",dev,check_state(curr_btns,"TMPUP"),dev_id)
+        layout.addView(tmpup)
+        val tmpdown = add_button("-TMPDOWN",dev,check_state(curr_btns,"TMPDOWN"),dev_id)
+        layout.addView(tmpdown)
+
+        //Temperatures up down buttens
+        val hlayout6 = LinearLayout(context)
+        hlayout6.orientation = LinearLayout.VERTICAL
+        val fantxt = TextView(context)
+        fantxt.setText("Fan Speed")
+        //txt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        //txt.setTextColor(Color.BLUE)
+        hlayout6.addView(fantxt)
+        val fanup = add_button("+FANUP",dev,check_state(curr_btns,"FANUP"),dev_id)
+        hlayout6.addView(fanup)
+        val fandown = add_button("-FANDOWN",dev,check_state(curr_btns,"FANDOWN"),dev_id)
+        hlayout6.addView(fandown)
+/*
+        val hlayout7 = LinearLayout(context)
+        hlayout7.orientation = LinearLayout.HORIZONTAL
+        hlayout7.addView(hlayout5)
+        hlayout7.addView(hlayout6)
+*/
+        layout.addView(hlayout6)
+
+
 
         layout.setPadding(50, 40, 50, 10)
 
