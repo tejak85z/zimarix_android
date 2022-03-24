@@ -1,13 +1,14 @@
 package com.example.zimarix_1.ui.main
 
+import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.ListView
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -61,15 +62,35 @@ class PlaceholderFragment : Fragment() {
                 })
             } else if (it == "2") {
                 var devices = arrayOf<String>()
+                var dev_info = arrayOf<String>()
+                var i = 0
                 controller_devices.forEach {
                     val data = it.split(",")
                     data.forEach{
-                        if (it.split("_").size > 3)
-                            devices = devices + it
+                        val dev_params =  it.split("_")
+                        if(dev_params.size > 3){
+                            devices = devices + dev_params[1]
+                            val info = controller_ips[i]+","+dev_params[0]+","+dev_params[2]+","+dev_params[3]
+                            dev_info = dev_info + info
+                        }
                     }
+                    i = i +1
                 }
                 pioneers = devices
                 listView.setOnItemClickListener(OnItemClickListener { arg0, arg1, position, arg3 ->
+                    val layout = LinearLayout(context)
+                    layout.orientation = LinearLayout.VERTICAL
+
+                    val cncl = Switch(context)
+                    layout.addView(cncl)
+                    layout.setPadding(50, 40, 50, 10)
+                    val builder = AlertDialog.Builder(context)
+                        .setTitle(dev_info[position])
+                        .setView(layout)
+                    val dialog = builder.create()
+                    dialog.show()
+                    cncl.setOnClickListener(){
+                    }
                 })
             }
             else if (it == "3") {
