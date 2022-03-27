@@ -3,7 +3,9 @@ package com.example.zimarix_1.ui.main
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.ColorSpace
 import android.os.Bundle
+import android.os.StrictMode
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -18,8 +20,15 @@ import com.example.zimarix_1.zimarix_global.Companion.controller_keys
 import com.example.zimarix_1.zimarix_global.Companion.controller_names
 
 import android.widget.AdapterView.OnItemClickListener
+import com.example.zimarix_1.AES_encrpt
 import com.example.zimarix_1.Devsettings
+import com.example.zimarix_1.zimarix_global
 import com.example.zimarix_1.zimarix_global.Companion.controller_devices
+import com.example.zimarix_1.zimarix_global.Companion.controller_ids
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.net.Socket
+import java.net.SocketException
 
 
 /**
@@ -70,7 +79,7 @@ class PlaceholderFragment : Fragment() {
                         val dev_params =  it.split("_")
                         if(dev_params.size > 3){
                             devices = devices + dev_params[1]
-                            val info = controller_ips[i]+","+dev_params[0]+","+dev_params[2]+","+dev_params[3]
+                            val info = i.toString()+","+dev_params[0]+","+dev_params[2]+","+dev_params[3]
                             dev_info = dev_info + info
                         }
                     }
@@ -81,16 +90,41 @@ class PlaceholderFragment : Fragment() {
                     val layout = LinearLayout(context)
                     layout.orientation = LinearLayout.VERTICAL
 
-                    val cncl = Switch(context)
-                    layout.addView(cncl)
-                    layout.setPadding(50, 40, 50, 10)
+                    val dev = dev_info[position].split(",")
+                    if(dev[2] == "1") {
+                        val cncl = Button(context)
+                        if(dev[3] == "1") {
+                            cncl.setText("ON")
+                            cncl.setBackgroundColor(Color.rgb(10, 200, 10))
+                        }else{
+                            cncl.setText("OFF")
+                            cncl.setBackgroundColor(Color.rgb(100, 10, 10))
+                        }
+                        cncl.setOnClickListener() {
+                            var tstr = dev[0]+","+dev[1]+","+dev[2]+","
+                            var cmd = "C,"+dev[1]+","
+                            if(cncl.text == "ON"){
+                                cncl.setText("OFF")
+                                cncl.setBackgroundColor(Color.rgb(100, 10, 10))
+                                tstr = tstr+"0"
+                                cmd = cmd + "OFF"
+                            }else{
+                                cncl.setText("ON")
+                                cncl.setBackgroundColor(Color.rgb(10, 200, 10))
+                                tstr = tstr+"1"
+                                cmd = cmd + "ON"
+                            }
+                            dev_info[position] = tstr
+                            send_to_device(dev[0].toInt(),cmd)
+                        }
+                        layout.addView(cncl)
+                    }
+                    //layout.setPadding(50, 40, 50, 10)
                     val builder = AlertDialog.Builder(context)
-                        .setTitle(dev_info[position])
+                        .setTitle(devices[position])
                         .setView(layout)
                     val dialog = builder.create()
                     dialog.show()
-                    cncl.setOnClickListener(){
-                    }
                 })
             }
             else if (it == "3") {
@@ -109,6 +143,57 @@ class PlaceholderFragment : Fragment() {
         })
 
         return root
+    }
+    fun send_to_device(i:Int, data:String): String {
+        var resp = "FAIL"
+        resp = send_to_local_device(i,data)
+        if(resp != "OK")
+            resp = send_to_remote(i,data)
+
+        return resp
+    }
+
+    fun send_to_local_device(i:Int, data:String): String {
+        var resp = "FAIL"
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+        try {
+            if(zimarix_global.controller_ips[i] == "0" || zimarix_global.controller_ips[i].length < 7){
+                return "INVALID CONFIG"
+            }
+            val client = Socket(controller_ips[i], 20009)
+            val enc_probe = AES_encrpt(controller_keys[i],data)
+            client!!.outputStream.write(enc_probe)
+            val bufferReader = BufferedReader(InputStreamReader(client!!.inputStream))
+            resp = bufferReader.readLine()
+            client.close()
+        }catch (t: SocketException){
+
+        }
+        return resp
+    }
+    fun send_to_remote(i:Int, data:String): String {
+        var resp = "FAIL"
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+        try {
+            var client = Socket(zimarix_global.zimarix_server, 11112)
+
+
+            val Sdata = "C"+controller_ids[i]
+            val enc_data = AES_encrpt(zimarix_global.appkey, Sdata)
+
+
+            val enc_probe = AES_encrpt(controller_keys[i],data)
+            client!!.outputStream.write(zimarix_global.appid.toByteArray()+",C".toByteArray()+ enc_data+",".toByteArray()+enc_probe)
+
+            val bufferReader = BufferedReader(InputStreamReader(client!!.inputStream))
+            resp = bufferReader.readLine()
+            client.close()
+        }catch (t: SocketException){
+
+        }
+        return resp
     }
 
     companion object {
