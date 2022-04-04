@@ -660,6 +660,8 @@ class SettingsFragment : Fragment() {
         hlayout5.orientation = LinearLayout.HORIZONTAL
         val mute = add_button("mute",dev,check_state(curr_btns,"mute"),dev_id)
         hlayout5.addView(mute)
+        val unmute = add_button("unmute",dev,check_state(curr_btns,"unmute"),dev_id)
+        hlayout5.addView(unmute)
         val pause = add_button("pause",dev,check_state(curr_btns,"pause"),dev_id)
         hlayout5.addView(pause)
         val play = add_button("play",dev,check_state(curr_btns,"play"),dev_id)
