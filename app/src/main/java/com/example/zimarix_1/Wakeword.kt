@@ -314,21 +314,6 @@ class Wakeword : AppCompatActivity() {
                         dialog.dismiss()
                     }
                 }
-
-              /*
-                if(enable.isChecked == true && i == 0){
-                    Toast.makeText(context, "Select Port type", Toast.LENGTH_SHORT).show()
-                }else {
-                    val send_str =
-                        "U," + port[0] + "," + port[1] + "," + portname + "," + portenable + "," + i.toString() + "," + PS
-                    Toast.makeText(context, "port params " + send_str, Toast.LENGTH_SHORT).show()
-                    val resp = encrypt_and_send_data(send_str)
-                    Toast.makeText(context, resp, Toast.LENGTH_SHORT).show()
-                    if(resp == "OK")
-                        dialog.dismiss()
-                }
-
-                 */
             }
 
         }

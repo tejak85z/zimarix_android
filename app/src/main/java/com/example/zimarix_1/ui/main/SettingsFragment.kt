@@ -4,6 +4,7 @@ import android.R
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.os.StrictMode
 import android.util.Log
@@ -19,6 +20,7 @@ import com.example.zimarix_1.*
 import com.example.zimarix_1.databinding.FragmentMainBinding
 import com.example.zimarix_1.zimarix_global.Companion.curr_device
 import com.example.zimarix_1.zimarix_global.Companion.dev_config
+import com.google.android.material.progressindicator.LinearProgressIndicator
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.Socket
@@ -96,12 +98,23 @@ class SettingsFragment : Fragment() {
                         pioneers = pioneers + conf[1]
                     }
                 }
-                pioneers = pioneers + "Bluetooth Speaker ,enable remote support , upgrade ".split(",")
+                pioneers = pioneers + "Bluetooth Speaker,enable remote support , upgrade ".split(",")
                 listView.setOnItemClickListener(AdapterView.OnItemClickListener { arg0, arg1, position, arg3 ->
                     if(pioneers[position] == "Offline Wake Word Config"){
                         val intent = Intent(getActivity(), Wakeword::class.java)
                         startActivity(intent)
                         //process_wakeword_settings(configs[position])
+                    } else if (pioneers[position] == "Power Save Settings"){
+                        power_save_dialog(configs[position])
+                    }else if (pioneers[position] == "SPEAKER Settings"){
+                        volume_dialog(configs[position])
+                    }else if (pioneers[position] == "LED Settings"){
+                        led_dialog()
+                    }else if (pioneers[position] == "ALEXA Settings"){
+                        alexa_dialog(configs[position])
+                    }else if (pioneers[position] == "Bluetooth Speaker"){
+                        val intent = Intent(getActivity(), btspeaker::class.java)
+                        startActivity(intent)
                     }
                 })
             }
@@ -184,6 +197,236 @@ class SettingsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding1 = null
+    }
+
+    fun alexa_dialog(avsconf: String) {
+        val layout = LinearLayout(context)
+        layout.orientation = LinearLayout.VERTICAL
+
+        val params = avsconf.split(",")
+        val enable = params[2]
+        val avs_params = params[3].split("_")
+
+        val avsenable = Switch(context)
+        avsenable.text = "Enable Alexa Voice Service"
+        if (enable == "0") {
+            avsenable.isChecked = true
+        }else
+            avsenable.isChecked = false
+        avsenable.textSize = 16F
+        layout.addView(avsenable)
+        avsenable.setOnClickListener(){
+            val req = "U,AVS,ENABLE,"+avsenable.isChecked
+            encrypt_and_send_data(req)
+        }
+
+        val avsww = Switch(context)
+        avsww.text = "Use keyword ALEXA to wake up device"
+        if (enable == "0") {
+            avsww.isChecked = true
+        }else
+            avsww.isChecked = false
+        avsww.textSize = 16F
+        layout.addView(avsww)
+        avsww.setOnClickListener(){
+            val req = "U,AVS,WW,"+avsww.isChecked
+            encrypt_and_send_data(req)
+            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://amazon.com/us/code"))
+            startActivity(browserIntent)
+        }
+
+        val avslisten = Button(context)
+        avslisten.text = "listen"
+        avslisten.setOnClickListener {
+            val req = "U,AVS,listen"
+            encrypt_and_send_data(req)
+        }
+        layout.addView(avslisten)
+
+        val avsstop = Button(context)
+        avsstop.text = "stop"
+        avsstop.setOnClickListener {
+            val req = "U,AVS,stop"
+            encrypt_and_send_data(req)
+        }
+        layout.addView(avsstop)
+
+        val avsmute = Switch(context)
+        avsmute.text = "mute"
+
+        layout.addView(avsmute)
+        avsmute.setOnClickListener(){
+            val req = "U,AVS,mute,"+avsmute.isChecked
+            encrypt_and_send_data(req)
+        }
+
+        layout.setPadding(50, 40, 50, 10)
+
+        val builder = AlertDialog.Builder(context)
+            .setTitle("LED Settings")
+            .setView(layout)
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    fun led_dialog() {
+        val layout = LinearLayout(context)
+        layout.orientation = LinearLayout.VERTICAL
+
+        val rst = Button(context)
+        rst.text = "reset led"
+        rst.textSize = 16F
+        layout.addView(rst)
+        rst.setOnClickListener(){
+            val req = "I,LED,RESET,"
+            encrypt_and_send_data(req)
+        }
+
+        layout.setPadding(50, 40, 50, 10)
+
+        val builder = AlertDialog.Builder(context)
+            .setTitle("LED Settings")
+            .setView(layout)
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    fun volume_dialog(psconf: String) {
+        val layout = LinearLayout(context)
+        layout.orientation = LinearLayout.VERTICAL
+
+        val params = psconf.split(",")
+        val enable = params[2]
+        val volume = params[3]
+
+        val vol = SeekBar(context)
+        if (volume.length > 0)
+            vol.progress = volume.toInt()
+        layout.addView(vol)
+
+        vol.setOnSeekBarChangeListener(object :
+            SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seek: SeekBar,
+                                           progress: Int, fromUser: Boolean) {
+                val req = "I,VOL,VAL,"+seek.progress.toString()
+                encrypt_and_send_data(req)
+            }
+
+            override fun onStartTrackingTouch(seek: SeekBar) {}
+            override fun onStopTrackingTouch(seek: SeekBar) {
+                val req = "U,VOL,VAL,"+seek.progress.toString()
+                encrypt_and_send_data(req)
+            }
+        })
+
+
+        val mutebtn = Switch(context)
+        mutebtn.text = "mute"
+        if (enable == "0") {
+            mutebtn.isChecked = true
+        }else
+            mutebtn.isChecked = false
+        mutebtn.textSize = 16F
+        layout.addView(mutebtn)
+        mutebtn.setOnClickListener(){
+            val req = "U,VOL,MUTE,"+mutebtn.isChecked
+            encrypt_and_send_data(req)
+        }
+
+        layout.setPadding(50, 40, 50, 10)
+
+        val builder = AlertDialog.Builder(context)
+            .setTitle("Volume Settings")
+            .setView(layout)
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    fun power_save_dialog(psconf: String) {
+        val layout = LinearLayout(context)
+        layout.orientation = LinearLayout.VERTICAL
+
+        val params = psconf.split(",")
+        val ps_enable = params[2]
+        val ps_params = params[3].split("_")
+        val enable = Switch(context)
+        enable.text = "Power Save Enable"
+        if (ps_enable == "1") {
+            enable.isChecked = true
+        }else
+            enable.isChecked = false
+        enable.textSize = 16F
+        layout.addView(enable)
+
+        val hlayout1 = LinearLayout(context)
+        hlayout1.orientation = LinearLayout.HORIZONTAL
+
+        val timeouttxt = TextView(context)
+        timeouttxt.setText("TIMEOUT Minutes: ")
+        hlayout1.addView(timeouttxt)
+        val timeout = EditText(context)
+        timeout.setSingleLine()
+        timeout.hint = ps_params[0] + " (min:1 Max:60)"
+        hlayout1.addView(timeout)
+        layout.addView(hlayout1)
+
+        val auto_on = Switch(context)
+        auto_on.text = "Enable Device Auto Turn ON"
+        if (ps_params[1] == "1")
+            auto_on.isChecked = true
+        else
+            auto_on.isChecked = false
+        auto_on.textSize = 16F
+        layout.addView(auto_on)
+
+        val wwflag = Switch(context)
+        wwflag.text = "Use Keyword Trigger"
+        if (ps_params[2] == "1")
+            wwflag.isChecked = true
+        else
+            wwflag.isChecked = false
+        wwflag.textSize = 16F
+        layout.addView(wwflag)
+
+        val motion = Switch(context)
+        motion.text = "Use Motion Sensor Trigger"
+        if (ps_params[3] == "1")
+            motion.isChecked = true
+        else
+            motion.isChecked = false
+        motion.textSize = 16F
+        layout.addView(motion)
+
+        val camera = Switch(context)
+        camera.text = "Use Camera Trigger"
+        if (ps_params[4] == "1")
+            camera.isChecked = true
+        else
+            camera.isChecked = false
+        camera.textSize = 16F
+        layout.addView(camera)
+
+        layout.setPadding(50, 40, 50, 10)
+
+        val builder = AlertDialog.Builder(context)
+            .setTitle("POWER SAVE Settings")
+            .setView(layout)
+            .setPositiveButton("UPDATE", null)
+            .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
+                // so something, or not - dialog will close
+                dialog.dismiss()
+            }
+        val dialog = builder.create()
+
+        dialog.setOnShowListener {
+            val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            okButton.setOnClickListener {
+                val req = "U,PS,"+enable.isChecked+","+timeout.text.toString()+","+auto_on.isChecked+","+wwflag.isChecked+","+motion.isChecked+","+camera.isChecked
+                encrypt_and_send_data(req)
+                dialog.dismiss()
+            }
+        }
+        dialog.show()
     }
 
     fun show_remote(data:String){
@@ -1049,60 +1292,5 @@ class SettingsFragment : Fragment() {
 
         }
         return resp
-    }
-
-    fun process_wakeword_settings(s: String) {
-        val layout = LinearLayout(context)
-        val param = s.split("_")
-        layout.orientation = LinearLayout.VERTICAL
-        Log.d("debug ", " ================= $param")
-        if(param[2] == "0") {
-            val enable = Switch(context)
-            enable.text = "ENABLE Offline Wake Word"
-            enable.textSize = 16F
-            layout.addView(enable)
-
-            layout.setPadding(50, 40, 50, 10)
-
-            val builder = AlertDialog.Builder(context)
-                .setTitle("Offline Wake Word")
-                .setView(layout)
-                .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
-                    // so something, or not - dialog will close
-                }
-            val dialog = builder.create()
-            enable.setOnClickListener {
-                set_ww_params(s)
-                dialog.dismiss()
-            }
-            dialog.show()
-        }else{
-            set_ww_params(s)
-        }
-    }
-
-    fun set_ww_params(s: String){
-        val layout = LinearLayout(context)
-        val param = s.split("_")
-
-        layout.orientation = LinearLayout.VERTICAL
-        val timeout = EditText(context)
-        timeout.setSingleLine()
-        timeout.hint =" Timeout to discard wakeword sequence.\n Default 5 Seconds\n Current "+ param[3] + "Seconds"
-        layout.addView(timeout)
-
-        layout.setPadding(50, 40, 50, 10)
-
-        val builder = AlertDialog.Builder(context)
-            .setTitle("Offline Wake Word Settings")
-            .setView(layout)
-            .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
-                // so something, or not - dialog will close
-            }
-            .setPositiveButton("OK"){ dialog, whichButton ->
-                // so something, or not - dialog will close
-            }
-        val dialog = builder.create()
-        dialog.show()
     }
 }

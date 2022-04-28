@@ -6,7 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
+import android.view.View
 import android.widget.PopupMenu
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.core.app.ActivityCompat.recreate
 import androidx.fragment.app.FragmentTransaction
@@ -114,6 +116,7 @@ class MainActivity : AppCompatActivity() {
                         if(item.length > 7) {
                             var client = Socket(item, 20009)
                             val probe = "D"+ getRandomString(15)
+                            Log.i("TAG", controller_keys[index])
                             val enc_probe = AES_encrpt(controller_keys[index],probe)
                             client!!.outputStream.write(enc_probe)
 
