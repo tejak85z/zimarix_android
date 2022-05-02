@@ -1,19 +1,13 @@
 package com.example.zimarix_1
 
-import android.app.AlertDialog
-import android.bluetooth.BluetoothDevice
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.ViewGroup
 import android.widget.*
 import androidx.viewpager.widget.ViewPager
 import com.example.zimarix_1.databinding.ActivityDevsettingsBinding
-import com.example.zimarix_1.databinding.ActivityMainBinding
-import com.example.zimarix_1.ui.main.SectionsPagerAdapter
 import com.example.zimarix_1.ui.main.SettingsPagerAdapter
 import com.example.zimarix_1.zimarix_global.Companion.controller_ips
-import com.example.zimarix_1.zimarix_global.Companion.controller_names
 import com.google.android.material.tabs.TabLayout
 import java.io.BufferedReader
 import java.io.InputStreamReader

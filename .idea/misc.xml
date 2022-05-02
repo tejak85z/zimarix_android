@@ -13,6 +13,8 @@
         <entry key="app/src/main/res/layout/activity_addnewcontroller.xml" value="0.19635416666666666" />
         <entry key="app/src/main/res/layout/activity_addnewdevice.xml" value="0.21145833333333333" />
         <entry key="app/src/main/res/layout/activity_addnewremote.xml" value="0.21145833333333333" />
+        <entry key="app/src/main/res/layout/activity_after_notification.xml" value="0.12335526315789473" />
+        <entry key="app/src/main/res/layout/activity_avsregistration.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_controller_settings.xml" value="0.21145833333333333" />
         <entry key="app/src/main/res/layout/activity_devsettings.xml" value="0.17" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.21145833333333333" />

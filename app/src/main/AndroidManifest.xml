@@ -16,6 +16,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -24,6 +25,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Zimarix_1">
+        <activity
+            android:name=".avsregistration"
+            android:exported="false" />
+        <activity
+            android:name=".afterNotification"
+            android:exported="false" />
         <activity
             android:name=".Wakeword"
             android:exported="false" />

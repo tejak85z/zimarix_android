@@ -1,9 +1,13 @@
 package com.example.zimarix_1
 
+import android.app.Notification
+import android.app.NotificationManager
 import android.content.SharedPreferences
 import android.util.Base64
 import android.util.Log
+import android.widget.RemoteViews
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
 import com.example.zimarix_1.zimarix_global.Companion.appid
 import com.example.zimarix_1.zimarix_global.Companion.appkey
 import com.example.zimarix_1.zimarix_global.Companion.config_watchdog
@@ -204,5 +208,9 @@ class zimarix_global {
         var controller_devices: MutableList<String> = ArrayList()
         var dev_config: List<String> = ArrayList()
         var curr_device : Int = -1
+
+        lateinit var notificationManager: NotificationManagerCompat
+        val channelId = "Progress Notification" as String
+
     }
 }

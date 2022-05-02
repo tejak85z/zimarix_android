@@ -1,17 +1,22 @@
 package com.example.zimarix_1
 
-import android.app.Activity
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
-import android.view.View
 import android.widget.PopupMenu
-import android.widget.ProgressBar
+import android.widget.RemoteViews
 import android.widget.Toast
-import androidx.core.app.ActivityCompat.recreate
-import androidx.fragment.app.FragmentTransaction
+import androidx.core.app.NotificationManagerCompat
 import androidx.viewpager.widget.ViewPager
 import com.example.zimarix_1.databinding.ActivityMainBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -20,6 +25,7 @@ import com.example.zimarix_1.ui.main.SectionsPagerAdapter
 import com.example.zimarix_1.zimarix_global.Companion.app_state
 import com.example.zimarix_1.zimarix_global.Companion.appid
 import com.example.zimarix_1.zimarix_global.Companion.appkey
+//import com.example.zimarix_1.zimarix_global.Companion.builder
 import com.example.zimarix_1.zimarix_global.Companion.config_watchdog
 import com.example.zimarix_1.zimarix_global.Companion.controller_devices
 import com.example.zimarix_1.zimarix_global.Companion.controller_ids
@@ -28,6 +34,7 @@ import com.example.zimarix_1.zimarix_global.Companion.controller_keys
 import com.example.zimarix_1.zimarix_global.Companion.controller_names
 import com.example.zimarix_1.zimarix_global.Companion.ip_conf_ver
 import com.example.zimarix_1.zimarix_global.Companion.key_conf_ver
+import com.example.zimarix_1.zimarix_global.Companion.notificationManager
 import com.example.zimarix_1.zimarix_global.Companion.zimarix_server
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -37,13 +44,46 @@ import java.io.InputStreamReader
 import java.lang.IllegalArgumentException
 import java.net.Socket
 import java.net.SocketException
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityMainBinding
+
+/*
+    lateinit var notificationChannel: NotificationChannel
+    private val channelId = "i.apps.notifications"
+    private val description = "Test notification"
+*/
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        notificationManager = NotificationManagerCompat.from(this)
+/*
+        notificationManager = this?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val intent = Intent(this, afterNotification::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val contentView = RemoteViews(packageName,R.layout.activity_after_notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationChannel = NotificationChannel(channelId, description, NotificationManager.IMPORTANCE_HIGH)
+            notificationChannel.enableLights(true)
+            notificationChannel.lightColor = Color.GREEN
+            notificationChannel.enableVibration(false)
+            notificationManager.createNotificationChannel(notificationChannel)
+            builder = Notification.Builder(this, channelId)
+                .setContent(contentView)
+                .setSmallIcon(com.example.zimarix_1.R.drawable.ic_launcher_background)
+                .setLargeIcon(BitmapFactory.decodeResource(this.resources, com.example.zimarix_1.R.drawable.ic_launcher_background))
+                .setContentIntent(pendingIntent)
+        } else {
+
+            builder = Notification.Builder(this)
+                .setContent(contentView)
+                .setSmallIcon(com.example.zimarix_1.R.drawable.ic_launcher_background)
+                .setLargeIcon(BitmapFactory.decodeResource(this.resources, com.example.zimarix_1.R.drawable.ic_launcher_background))
+                .setContentIntent(pendingIntent)
+        }
+*/
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

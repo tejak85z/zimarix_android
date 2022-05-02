@@ -1,30 +1,39 @@
 package com.example.zimarix_1.ui.main
 
-import android.R
 import android.app.AlertDialog
+import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.StrictMode
+import android.provider.Settings
+import android.util.Base64
 import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.zimarix_1.*
 import com.example.zimarix_1.databinding.FragmentMainBinding
+import com.example.zimarix_1.zimarix_global.Companion.channelId
 import com.example.zimarix_1.zimarix_global.Companion.curr_device
 import com.example.zimarix_1.zimarix_global.Companion.dev_config
-import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.example.zimarix_1.zimarix_global.Companion.notificationManager
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.lang.IllegalArgumentException
 import java.net.Socket
 import java.net.SocketException
+
+//import com.example.zimarix_1.zimarix_global.Companion.builder
+//import com.example.zimarix_1.zimarix_global.Companion.notificationManager
 
 class SettingsFragment : Fragment() {
 
@@ -37,6 +46,7 @@ class SettingsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         pageViewModel = ViewModelProvider(this).get(PageViewModel::class.java).apply {
             setIndex(arguments?.getInt(ARG_SECTION_NUMBER) ?: 1)
         }
@@ -111,10 +121,31 @@ class SettingsFragment : Fragment() {
                     }else if (pioneers[position] == "LED Settings"){
                         led_dialog()
                     }else if (pioneers[position] == "ALEXA Settings"){
-                        alexa_dialog(configs[position])
+                    /*    val intent = Intent(context, afterNotification::class.java).apply{
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                                    Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        }
+                        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+                        val progressMax = 100
+                        val notification =
+                            NotificationCompat.Builder(context!!, channelId)
+                                .setSmallIcon(R.drawable.ic_launcher_background)
+                                .setContentTitle("ALEXA ACTIVATION CODE")
+                                .setContentText("12345")
+                                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                                .setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000))
+                                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
+                                //.setOngoing(true)
+                                //.setOnlyAlertOnce(true)
+                                .setContentIntent(pendingIntent)
+                                //.setAutoCancel(true)
+                        notificationManager.notify(1, notification.build())
+                      */
+                        val ret = get_service_config("AVS")
+                        alexa_dialog(ret)
                     }else if (pioneers[position] == "Bluetooth Speaker"){
-                        val intent = Intent(getActivity(), btspeaker::class.java)
-                        startActivity(intent)
+                        //val intent = Intent(getActivity(), btspeaker::class.java)
+                        //startActivity(intent)
                     }
                 })
             }
@@ -163,7 +194,7 @@ class SettingsFragment : Fragment() {
             val adapter = activity?.let {
                 ArrayAdapter<String>(
                     it,
-                    R.layout.simple_list_item_1,
+                    android.R.layout.simple_list_item_1,
                     pioneers
                 )
             }
@@ -204,66 +235,141 @@ class SettingsFragment : Fragment() {
         layout.orientation = LinearLayout.VERTICAL
 
         val params = avsconf.split(",")
-        val enable = params[2]
-        val avs_params = params[3].split("_")
+        val enable = params[1]
+        val ww_enable = params[2]
+        val snsty = params[3]
+        val mute = params[4]
+        val code = params[5]
+        val auth = params[6]
 
         val avsenable = Switch(context)
-        avsenable.text = "Enable Alexa Voice Service"
-        if (enable == "0") {
-            avsenable.isChecked = true
-        }else
-            avsenable.isChecked = false
-        avsenable.textSize = 16F
         layout.addView(avsenable)
+        avsenable.text = "Enable Alexa Voice Service"
+        if (enable == "1") {
+            avsenable.isChecked = true
+            if (auth == "1" ) {
+                val avsww = Switch(context)
+                avsww.text = "Use keyword ALEXA to wake up device"
+                if (ww_enable == "1") {
+                    avsww.isChecked = true
+                } else
+                    avsww.isChecked = false
+                avsww.textSize = 16F
+                layout.addView(avsww)
+                avsww.setOnClickListener() {
+                    val req = "I,AVS,WW," + avsww.isChecked
+                    encrypt_and_send_data(req)
+                }
+
+                val snsty_info = TextView(context)
+                snsty_info.text = "ALEXA SENSITIVITY"
+                layout.addView(snsty_info)
+
+                val alexa_snsty = SeekBar(context)
+                if (snsty.length > 0)
+                    alexa_snsty.progress = (snsty.toFloat()*100).toInt()
+                layout.addView(alexa_snsty)
+
+                alexa_snsty.setOnSeekBarChangeListener(object :
+                    SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(seek: SeekBar,
+                                                   progress: Int, fromUser: Boolean) {}
+                    override fun onStartTrackingTouch(seek: SeekBar) {}
+                    override fun onStopTrackingTouch(seek: SeekBar) {
+                        val req = "U,ww,sensitivity,alexa_raspberry-pi.ppn:"+((seek.progress.toFloat())/100).toString()
+                        encrypt_and_send_data(req)
+                    }
+                })
+
+                val avsmute = Switch(context)
+                avsmute.text = "mute"
+                if (mute == "0") {
+                    avsmute.isChecked = true
+                } else
+                    avsmute.isChecked = false
+
+                layout.addView(avsmute)
+                avsmute.setOnClickListener() {
+                    val req = "U,VOL,MUTE,"+avsmute.isChecked
+                    encrypt_and_send_data(req)
+                }
+
+                val avslisten = Button(context)
+                avslisten.text = "listen"
+                avslisten.setOnClickListener {
+                    val req = "I,AVS,listen"
+                    encrypt_and_send_data(req)
+                }
+                layout.addView(avslisten)
+
+                val avsstop = Button(context)
+                avsstop.text = "stop"
+                avsstop.setOnClickListener {
+                    val req = "I,AVS,stop"
+                    encrypt_and_send_data(req)
+                }
+                layout.addView(avsstop)
+
+                val avsplay = Button(context)
+                avsplay.text = "play"
+                avsplay.setOnClickListener {
+                    val req = "I,AVS,play"
+                    encrypt_and_send_data(req)
+                }
+                layout.addView(avsplay)
+
+                val avspause = Button(context)
+                avspause.text = "pause"
+                avspause.setOnClickListener {
+                    val req = "I,AVS,pause"
+                    encrypt_and_send_data(req)
+                }
+                layout.addView(avspause)
+
+                val avsnext = Button(context)
+                avsnext.text = "next"
+                avsnext.setOnClickListener {
+                    val req = "I,AVS,next"
+                    encrypt_and_send_data(req)
+                }
+                layout.addView(avsnext)
+
+                val avsprev = Button(context)
+                avsprev.text = "previous"
+                avsprev.setOnClickListener {
+                    val req = "I,AVS,prev"
+                    encrypt_and_send_data(req)
+                }
+                layout.addView(avsprev)
+
+                val avsreauth = Button(context)
+                avsreauth.text = "Re-Authorise"
+                avsreauth.setOnClickListener {
+                    val req = "I,AVS,reauth"
+                    encrypt_and_send_data(req)
+                }
+                layout.addView(avsreauth)
+
+            }else if(auth == "0" && code.length > 1){
+                val intent = Intent(getActivity(), avsregistration::class.java)
+                val b = Bundle()
+                b.putString("avskey",code) //Your id
+                intent.putExtras(b)
+                startActivity(intent)
+                return
+            }
+        }else {
+            avsenable.isChecked = false
+        }
+        avsenable.textSize = 16F
         avsenable.setOnClickListener(){
-            val req = "U,AVS,ENABLE,"+avsenable.isChecked
+            val req = "I,AVS,ENABLE,"+avsenable.isChecked
             encrypt_and_send_data(req)
         }
-
-        val avsww = Switch(context)
-        avsww.text = "Use keyword ALEXA to wake up device"
-        if (enable == "0") {
-            avsww.isChecked = true
-        }else
-            avsww.isChecked = false
-        avsww.textSize = 16F
-        layout.addView(avsww)
-        avsww.setOnClickListener(){
-            val req = "U,AVS,WW,"+avsww.isChecked
-            encrypt_and_send_data(req)
-            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://amazon.com/us/code"))
-            startActivity(browserIntent)
-        }
-
-        val avslisten = Button(context)
-        avslisten.text = "listen"
-        avslisten.setOnClickListener {
-            val req = "U,AVS,listen"
-            encrypt_and_send_data(req)
-        }
-        layout.addView(avslisten)
-
-        val avsstop = Button(context)
-        avsstop.text = "stop"
-        avsstop.setOnClickListener {
-            val req = "U,AVS,stop"
-            encrypt_and_send_data(req)
-        }
-        layout.addView(avsstop)
-
-        val avsmute = Switch(context)
-        avsmute.text = "mute"
-
-        layout.addView(avsmute)
-        avsmute.setOnClickListener(){
-            val req = "U,AVS,mute,"+avsmute.isChecked
-            encrypt_and_send_data(req)
-        }
-
         layout.setPadding(50, 40, 50, 10)
 
         val builder = AlertDialog.Builder(context)
-            .setTitle("LED Settings")
+            .setTitle("ALEXA Settings")
             .setView(layout)
         val dialog = builder.create()
         dialog.show()
@@ -1287,6 +1393,38 @@ class SettingsFragment : Fragment() {
             client!!.outputStream.write(enc_probe)
             val bufferReader = BufferedReader(InputStreamReader(client!!.inputStream))
             resp = bufferReader.readLine()
+            client.close()
+        }catch (t: SocketException){
+
+        }
+        return resp
+    }
+
+    fun get_service_config(data : String): String {
+        var resp = "FAIL"
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+        try {
+            if(zimarix_global.controller_ips[curr_device] == "0" || zimarix_global.controller_ips[curr_device].length < 7){
+                return "INVALID CONFIG"
+            }
+            val req = "G,"+data
+            val client = Socket(zimarix_global.controller_ips[curr_device], 20009)
+            val enc_probe = AES_encrpt(zimarix_global.controller_keys[curr_device],req)
+            client!!.outputStream.write(enc_probe)
+            val bufferReader = BufferedReader(InputStreamReader(client!!.inputStream))
+            val buff = bufferReader.readLine()
+            if (buff != null && buff.length > 0 || buff != "FAIL") {
+                try {
+                    val decoded_buff = Base64.decode(buff, Base64.NO_PADDING)
+                    val data = AES_decrpt(zimarix_global.controller_keys[curr_device], decoded_buff)
+                    val param = data.split(",")
+                    if(param[0] == "G") {
+                        resp = data
+                    }
+                } catch (t: IllegalArgumentException) {
+                }
+            }
             client.close()
         }catch (t: SocketException){
 

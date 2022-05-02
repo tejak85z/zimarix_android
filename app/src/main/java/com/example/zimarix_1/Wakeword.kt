@@ -192,20 +192,33 @@ class Wakeword : AppCompatActivity() {
         layout.orientation = LinearLayout.VERTICAL
 
         val txt = TextView(this)
-        txt.setText("Sensitivity value should between 0 and 1.\n Default value 0.7 \n High sensitivity can cause false positive trigger")
+        txt.setText("High sensitivity can cause false positive trigger")
         txt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
         txt.setTextColor(Color.BLUE)
         layout.addView(txt)
 
-        var wws_snty = arrayOf<EditText>()
         wake_words.forEach {
-            val ww_snsty = EditText(this)
-            ww_snsty.setSingleLine()
             val param = it.split(",")
             val name = param[1].replace("_raspberry-pi.ppn", "")
-            ww_snsty.hint = name + " = " + param[2]
-            layout.addView(ww_snsty)
-            wws_snty = wws_snty + ww_snsty
+            val ww_name = TextView(this)
+            ww_name.text = name
+            layout.addView(ww_name)
+
+            val snsty = SeekBar(this)
+            if (param[2].length > 0)
+                snsty.progress = (param[2].toFloat()*100).toInt()
+            layout.addView(snsty)
+
+            snsty.setOnSeekBarChangeListener(object :
+                SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seek: SeekBar,
+                                               progress: Int, fromUser: Boolean) {}
+                override fun onStartTrackingTouch(seek: SeekBar) {}
+                override fun onStopTrackingTouch(seek: SeekBar) {
+                    val req = "U,ww,sensitivity,"+param[1]+":"+((seek.progress.toFloat())/100).toString()
+                    encrypt_and_send_data(req)
+                }
+            })
         }
 
         layout.setPadding(50, 40, 50, 10)
@@ -213,31 +226,11 @@ class Wakeword : AppCompatActivity() {
         val builder = AlertDialog.Builder(this)
             .setTitle("EDIT KEY WORD SENSITIVITY")
             .setView(layout)
-            .setPositiveButton("UPDATE", null)
             .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
                 // so something, or not - dialog will close
                 dialog.dismiss()
             }
         val dialog = builder.create()
-
-        dialog.setOnShowListener {
-            val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            okButton.setOnClickListener {
-                var i = 0
-                var req = "U,ww,sensitivity,"
-                wws_snty.forEach {
-                    if(it.text.isNotBlank()){
-                        req = req + wake_words[i].split(",")[1]+ ":"+it.text.toString()+","
-                    }
-                    i = i + 1
-                }
-                val resp = encrypt_and_send_data(req)
-                Toast.makeText(this, resp, Toast.LENGTH_SHORT).show()
-                if (resp == "OK"){
-                    dialog.dismiss()
-                }
-            }
-        }
         dialog.show()
     }
 
