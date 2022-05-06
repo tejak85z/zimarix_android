@@ -26,6 +26,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Zimarix_1">
         <activity
+            android:name=".btspeaker"
+            android:exported="false" />
+        <activity
             android:name=".avsregistration"
             android:exported="false" />
         <activity
