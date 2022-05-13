@@ -1,30 +1,27 @@
 package com.example.zimarix_1.ui.main
 
+//import android.R
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.ColorSpace
 import android.os.Bundle
 import android.os.StrictMode
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebView
 import android.widget.*
+import android.widget.AdapterView.OnItemClickListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.example.zimarix_1.*
 import com.example.zimarix_1.databinding.FragmentMainBinding
+import com.example.zimarix_1.zimarix_global.Companion.controller_devices
+import com.example.zimarix_1.zimarix_global.Companion.controller_ids
 import com.example.zimarix_1.zimarix_global.Companion.controller_ips
 import com.example.zimarix_1.zimarix_global.Companion.controller_keys
 import com.example.zimarix_1.zimarix_global.Companion.controller_names
-
-import android.widget.AdapterView.OnItemClickListener
-import com.example.zimarix_1.AES_encrpt
-import com.example.zimarix_1.Devsettings
-import com.example.zimarix_1.zimarix_global
-import com.example.zimarix_1.zimarix_global.Companion.controller_devices
-import com.example.zimarix_1.zimarix_global.Companion.controller_ids
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.Socket
@@ -130,6 +127,11 @@ class PlaceholderFragment : Fragment() {
             else if (it == "3") {
                 pioneers = controller_ips.toTypedArray()
                 listView.setOnItemClickListener(OnItemClickListener { arg0, arg1, position, arg3 ->
+                    val intent = Intent(getActivity(), livestream::class.java)
+                    val b = Bundle()
+                    b.putInt("key",position) //Your id
+                    intent.putExtras(b)
+                    startActivity(intent)
                 })
             }
             val adapter = activity?.let {
@@ -144,6 +146,7 @@ class PlaceholderFragment : Fragment() {
 
         return root
     }
+
     fun send_to_device(i:Int, data:String): String {
         var resp = "FAIL"
         resp = send_to_local_device(i,data)
