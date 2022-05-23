@@ -7,9 +7,25 @@
     tools:context=".livestream">
 
     <!-- Place Web-view on the Screen -->
+
     <ImageView
         android:id="@+id/imgView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></ImageView>
+        android:layout_height="500dp"
+        app:layout_constraintTop_toBottomOf="@+id/monitor"
+        tools:layout_editor_absoluteX="0dp"></ImageView>
+
+    <Button
+        android:id="@+id/call"
+        android:layout_width="match_parent"
+        android:layout_height="57dp"
+        android:text="call"
+        app:layout_constraintTop_toTopOf="parent" />
+    <Button
+        android:id="@+id/monitor"
+        android:layout_width="match_parent"
+        android:layout_height="57dp"
+        android:text="Start Monitor"
+        app:layout_constraintTop_toBottomOf="@id/call" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

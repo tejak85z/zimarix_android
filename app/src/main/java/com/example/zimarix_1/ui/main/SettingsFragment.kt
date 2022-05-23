@@ -120,8 +120,8 @@ class SettingsFragment : Fragment() {
                         volume_dialog(configs[position])
                     }else if (pioneers[position] == "LED Settings"){
                         led_dialog()
-                    }else if (pioneers[position] == "ALEXA Settings"){
-                    /*    val intent = Intent(context, afterNotification::class.java).apply{
+                    }else if (pioneers[position] == "ALEXA Settings") {
+                        /*    val intent = Intent(context, afterNotification::class.java).apply{
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or
                                     Intent.FLAG_ACTIVITY_CLEAR_TASK
                         }
@@ -143,9 +143,11 @@ class SettingsFragment : Fragment() {
                       */
                         val ret = get_service_config("AVS")
                         alexa_dialog(ret)
+                    }else if (pioneers[position] == "MONITOR Settings"){
+                        monitor_dialog(configs[position])
                     }else if (pioneers[position] == "Bluetooth Speaker"){
-                        //val intent = Intent(getActivity(), btspeaker::class.java)
-                        //startActivity(intent)
+                        val intent = Intent(getActivity(), btspeaker::class.java)
+                        startActivity(intent)
                     }
                 })
             }
@@ -230,6 +232,93 @@ class SettingsFragment : Fragment() {
         _binding1 = null
     }
 
+    fun add_monitor_btn(txt: String, param : String, idx :Int, enable:String): Switch {
+        var params = param.split("_")
+        val btn = Switch(context)
+        btn.text = txt
+        if (params[idx] == "1") {
+            btn.isChecked = true
+        }else
+            btn.isChecked = false
+        btn.textSize = 16F
+
+        return btn
+    }
+
+    fun monitor_dialog(monitorconf: String){
+        val layout = LinearLayout(context)
+        layout.orientation = LinearLayout.VERTICAL
+
+        val params = monitorconf.split(",")
+        val enable = params[2]
+
+        val enablemonitor = Button(context)
+        if (enable == "1") {
+            enablemonitor.text = "STOP MONITOR"
+            enablemonitor.setBackgroundColor(Color.BLUE);
+        }else {
+            enablemonitor.text = "START MONITOR"
+            enablemonitor.setBackgroundColor(Color.GRAY);
+        }
+        enablemonitor.textSize = 16F
+        layout.addView(enablemonitor)
+
+        var btn : ArrayList<Switch> = arrayListOf()
+        btn.add(add_monitor_btn("Enable Camera Motion Detection",params[3],0,enable))
+        btn.add(add_monitor_btn("Enable Camera Person Detection",params[3],1,enable))
+        btn.add(add_monitor_btn("Enable Sensor Detection",params[3],2,enable))
+        btn.add(add_monitor_btn("Alert on Device Offline",params[3],3,enable))
+        btn.add(add_monitor_btn("Enable Silent Monitoring",params[3],4,enable))
+        btn.add(add_monitor_btn("Enable Continuous Camera Recording",params[3],5,enable))
+        btn.add(add_monitor_btn("Alert on Storage Full",params[3],6,enable))
+
+        btn.forEach {
+            it.setOnClickListener(){
+                var retparams = "U,MON,"
+                if( enablemonitor.text == "STOP MONITOR") {
+                    retparams = retparams + "1,"
+                } else {
+                    retparams = retparams + "0,"
+                }
+                btn.forEach {
+                    if (it.isChecked == true)
+                        retparams = retparams + "1_"
+                    else
+                        retparams = retparams + "0_"
+                }
+                encrypt_and_send_data(retparams)
+            }
+            layout.addView(it)
+        }
+
+        enablemonitor.setOnClickListener(){
+            var retparams = "U,MON,"
+            if( enablemonitor.text == "STOP MONITOR") {
+                retparams = retparams + "0,"
+                enablemonitor.text = "START MONITOR"
+                enablemonitor.setBackgroundColor(Color.GRAY);
+            } else {
+                retparams = retparams + "1,"
+                enablemonitor.text = "STOP MONITOR"
+                enablemonitor.setBackgroundColor(Color.BLUE);
+            }
+            btn.forEach {
+                if (it.isChecked == true)
+                    retparams = retparams + "1_"
+                else
+                    retparams = retparams + "0_"
+            }
+            encrypt_and_send_data(retparams)
+        }
+
+        layout.setPadding(50, 40, 50, 10)
+
+        val builder = AlertDialog.Builder(context)
+            .setTitle("Monitor Settings")
+            .setView(layout)
+        val dialog = builder.create()
+        dialog.show()
+    }
     fun alexa_dialog(avsconf: String) {
         val layout = LinearLayout(context)
         layout.orientation = LinearLayout.VERTICAL

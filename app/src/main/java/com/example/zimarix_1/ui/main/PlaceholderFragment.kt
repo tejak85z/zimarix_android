@@ -125,13 +125,16 @@ class PlaceholderFragment : Fragment() {
                 })
             }
             else if (it == "3") {
-                pioneers = controller_ips.toTypedArray()
+                pioneers = pioneers + "Enable Monitor on all"
+                pioneers = pioneers + controller_names.toTypedArray()
                 listView.setOnItemClickListener(OnItemClickListener { arg0, arg1, position, arg3 ->
-                    val intent = Intent(getActivity(), livestream::class.java)
-                    val b = Bundle()
-                    b.putInt("key",position) //Your id
-                    intent.putExtras(b)
-                    startActivity(intent)
+                    if(position > 0 ) {
+                        val intent = Intent(getActivity(), livestream::class.java)
+                        val b = Bundle()
+                        b.putInt("key", position - 1) //Your id
+                        intent.putExtras(b)
+                        startActivity(intent)
+                    }
                 })
             }
             val adapter = activity?.let {

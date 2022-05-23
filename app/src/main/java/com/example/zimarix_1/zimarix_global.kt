@@ -18,8 +18,13 @@ import com.example.zimarix_1.zimarix_global.Companion.controller_keys
 import com.example.zimarix_1.zimarix_global.Companion.controller_names
 import com.example.zimarix_1.zimarix_global.Companion.ip_conf_ver
 import com.example.zimarix_1.zimarix_global.Companion.key_conf_ver
+import com.example.zimarix_1.zimarix_global.Companion.zimarix_server
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.lang.StringBuilder
 import java.net.NetworkInterface
+import java.net.Socket
+import java.net.SocketException
 import java.security.KeyStore
 import java.util.*
 import javax.crypto.Cipher
@@ -72,6 +77,20 @@ fun AES_decrpt(key: String, data: ByteArray):String{
     return dec_data
 }
 
+fun AES_decrpt_bytes(key: String, data: ByteArray):ByteArray{
+    if(data.size % 16 != 0)
+        return "".toByteArray()
+    val keyBytes = key.toByteArray(charset("UTF8"))
+    val skey = SecretKeySpec(keyBytes, "AES")
+    val ser_IV = "abcdefghijklmnop"
+    val spec = IvParameterSpec(ser_IV.toByteArray())
+
+    val AEScipher = Cipher.getInstance("AES/CBC/NoPadding")
+    AEScipher.init(Cipher.DECRYPT_MODE, skey, spec)
+    val dec_data = AEScipher.doFinal(data)
+    return dec_data
+}
+
 fun getRandomString(length: Int) : String {
     val charset = "ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz0123456789"
     return (1..length)
@@ -93,6 +112,51 @@ fun decryptData(ivBytes: ByteArray, data: ByteArray): String{
 
     cipher.init(Cipher.DECRYPT_MODE, getKey(), spec)
     return cipher.doFinal(data).toString(Charsets.UTF_8).trim()
+}
+
+fun enc_and_send_to_server(req: String): String{
+    var data = ""
+    try {
+        var client = Socket(zimarix_server, 11112)
+        val Sdata = "S" + req
+        val enc_data = AES_encrpt(appkey, Sdata)
+        client!!.outputStream.write(appid.toByteArray()+",S".toByteArray()+ enc_data)
+        val bufferReader = BufferedReader(InputStreamReader(client!!.inputStream))
+        val line = bufferReader.readLine()
+        if(line != null && line.length > 0 || line != "W") {
+            if (line.length < 15){
+                return line
+            }
+            val decoded_key = Base64.decode(line, Base64.NO_PADDING)
+            data = AES_decrpt(appkey, decoded_key)
+            Log.d("debug ", " received ======  ff $data")
+        }
+    }catch (t: SocketException){
+    }
+    return data
+}
+
+fun enc_and_send_to_device_via_server(req: String,did: String): String{
+    var data = ""
+    try {
+        var client = Socket(zimarix_server, 11112)
+        val Sdata = "S" + req
+        val enc_data = AES_encrpt(appkey, Sdata)
+        val reqstr = appid+"D,"+did+","
+        client!!.outputStream.write(reqstr.toByteArray()+ enc_data)
+        val bufferReader = BufferedReader(InputStreamReader(client!!.inputStream))
+        val line = bufferReader.readLine()
+        if(line != null && line.length > 0 || line != "W") {
+            if (line.length < 15){
+                return line
+            }
+            val decoded_key = Base64.decode(line, Base64.NO_PADDING)
+            data = AES_decrpt(appkey, decoded_key)
+            Log.d("debug ", " received ======  ff $data")
+        }
+    }catch (t: SocketException){
+    }
+    return data
 }
 
 fun load_app_id_and_key(prefs : SharedPreferences):Int{
