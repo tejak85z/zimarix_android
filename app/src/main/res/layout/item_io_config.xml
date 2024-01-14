@@ -1,0 +1,51 @@
+<!-- item_device_config.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="5dp">
+
+    <TextView
+        android:id="@+id/port"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="PORT :" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text="NAME :" />
+        <EditText
+            android:id="@+id/name"
+            android:layout_width="120dp"
+            android:layout_height="50dp" />
+        <Button
+            android:id="@+id/update"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text="UPDATE"
+            android:layout_marginLeft="16dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Spinner
+            android:id="@+id/type"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"/>
+        <Switch
+            android:id="@+id/ps"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text="POWER SAVE"
+            android:layout_marginLeft="16dp"/>
+    </LinearLayout>
+
+
+</LinearLayout>

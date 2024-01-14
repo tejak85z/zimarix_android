@@ -234,7 +234,7 @@ class addnewcontroller : AppCompatActivity() {
             if (recvdata.first() != 'R') {
                 return recvdata
             }
-            val enc_dev_mac = AES_encrpt(appkey, recvdata)
+            val enc_dev_mac = aes_encrpt(appkey, "abcdefghijklmnop",recvdata)
             s.send_data(appid.toByteArray() + ",".toByteArray() + enc_dev_mac)
             recvdata = s.recv_data()
         }

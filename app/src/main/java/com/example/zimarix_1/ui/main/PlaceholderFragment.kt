@@ -17,11 +17,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.zimarix_1.*
 import com.example.zimarix_1.databinding.FragmentMainBinding
-import com.example.zimarix_1.zimarix_global.Companion.controller_devices
-import com.example.zimarix_1.zimarix_global.Companion.controller_ids
-import com.example.zimarix_1.zimarix_global.Companion.controller_ips
-import com.example.zimarix_1.zimarix_global.Companion.controller_keys
-import com.example.zimarix_1.zimarix_global.Companion.controller_names
+import com.example.zimarix_1.zimarix_global.Companion.devices
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.Socket
@@ -58,9 +54,14 @@ class PlaceholderFragment : Fragment() {
         var pioneers=arrayOf<String>()
         pageViewModel.text.observe(viewLifecycleOwner, Observer {
             if (it == "1") {
-                pioneers = controller_names.toTypedArray()
+                //pioneers = controller_names.toTypedArray()
+                val iterator = devices.iterator()
+                while (iterator.hasNext()) {
+                    val currentObject = iterator.next()
+                    pioneers = pioneers + ("device_"+currentObject.id.toString())
+                }
                 listView.setOnItemClickListener(OnItemClickListener { arg0, arg1, position, arg3 ->
-                    val intent = Intent(getActivity(), Devsettings::class.java)
+                    val intent = Intent(getActivity(), DevConfig::class.java)
                     val b = Bundle()
                     b.putInt("key",position) //Your id
                     intent.putExtras(b)
@@ -70,6 +71,7 @@ class PlaceholderFragment : Fragment() {
                 var devices = arrayOf<String>()
                 var dev_info = arrayOf<String>()
                 var i = 0
+                /*
                 controller_devices.forEach {
                     val data = it.split(",")
                     data.forEach{
@@ -82,6 +84,8 @@ class PlaceholderFragment : Fragment() {
                     }
                     i = i +1
                 }
+
+                 */
                 pioneers = devices
                 listView.setOnItemClickListener(OnItemClickListener { arg0, arg1, position, arg3 ->
                     val layout = LinearLayout(context)
@@ -126,7 +130,7 @@ class PlaceholderFragment : Fragment() {
             }
             else if (it == "3") {
                 pioneers = pioneers + "Enable Monitor on all"
-                pioneers = pioneers + controller_names.toTypedArray()
+                //pioneers = pioneers + controller_names.toTypedArray()
                 listView.setOnItemClickListener(OnItemClickListener { arg0, arg1, position, arg3 ->
                     if(position > 0 ) {
                         val intent = Intent(getActivity(), livestream::class.java)
@@ -164,15 +168,18 @@ class PlaceholderFragment : Fragment() {
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
         try {
-            if(zimarix_global.controller_ips[i] == "0" || zimarix_global.controller_ips[i].length < 7){
+           /* if(zimarix_global.controller_ips[i] == "0" || zimarix_global.controller_ips[i].length < 7){
                 return "INVALID CONFIG"
             }
             val client = Socket(controller_ips[i], 20009)
-            val enc_probe = AES_encrpt(controller_keys[i],data)
+            val enc_probe = aes_encrpt(controller_keys[i],"abcdefghijklmnop",data)
+
             client!!.outputStream.write(enc_probe)
             val bufferReader = BufferedReader(InputStreamReader(client!!.inputStream))
             resp = bufferReader.readLine()
             client.close()
+
+            */
         }catch (t: SocketException){
 
         }
@@ -185,17 +192,19 @@ class PlaceholderFragment : Fragment() {
         try {
             var client = Socket(zimarix_global.zimarix_server, 11112)
 
-
+/*
             val Sdata = "C"+controller_ids[i]
-            val enc_data = AES_encrpt(zimarix_global.appkey, Sdata)
+            val enc_data = aes_encrpt(zimarix_global.appkey,"abcdefghijklmnop", Sdata)
 
 
-            val enc_probe = AES_encrpt(controller_keys[i],data)
+            val enc_probe = aes_encrpt(controller_keys[i],"abcdefghijklmnop",data)
             client!!.outputStream.write(zimarix_global.appid.toByteArray()+",C".toByteArray()+ enc_data+",".toByteArray()+enc_probe)
 
             val bufferReader = BufferedReader(InputStreamReader(client!!.inputStream))
             resp = bufferReader.readLine()
             client.close()
+
+ */
         }catch (t: SocketException){
 
         }

@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Ir_Tv_Remote">
+    <ProgressBar
+        android:id="@+id/tvprogressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
+    <LinearLayout
+        android:id="@+id/tv_on_off"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+        <Button
+            android:id="@+id/tv_on"
+            android:layout_width="130dp"
+            android:layout_height="60dp"
+            android:text="ON"
+            android:max="100"
+            android:layout_marginTop="6dp"/>
+        <Button
+            android:id="@+id/tv_off"
+            android:layout_width="130dp"
+            android:layout_height="60dp"
+            android:text="OFF"
+            android:max="100"
+            android:layout_marginTop="6dp"
+            android:layout_marginLeft="10dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/tv_chan_num_123"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp"
+        android:layout_below="@id/tv_on_off">
+
+        <Button
+            android:id="@+id/tv_1"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="1"
+            android:max="100"
+            android:layout_marginTop="2dp"/>
+        <Button
+            android:id="@+id/tv_2"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="2"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+        <Button
+            android:id="@+id/tv_3"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="3"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/tv_chan_num_456"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp"
+        android:layout_below="@id/tv_chan_num_123">
+
+        <Button
+            android:id="@+id/tv_4"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="4"
+            android:max="100"
+            android:layout_marginTop="2dp"/>
+        <Button
+            android:id="@+id/tv_5"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="5"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+        <Button
+            android:id="@+id/tv_6"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="6"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/tv_chan_num_789"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp"
+        android:layout_below="@id/tv_chan_num_456">
+
+        <Button
+            android:id="@+id/tv_7"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="7"
+            android:max="100"
+            android:layout_marginTop="2dp"/>
+        <Button
+            android:id="@+id/tv_8"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="8"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+        <Button
+            android:id="@+id/tv_9"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="9"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/tv_chan_num_0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp"
+        android:layout_below="@id/tv_chan_num_789">
+
+        <Button
+            android:id="@+id/tv_0"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="0"
+            android:max="100"
+            android:layout_marginTop="2dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/chan_up_down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="20dp"
+        android:layout_below="@id/tv_on_off"
+        android:layout_toRightOf="@id/tv_chan_num_123">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CHANNEL"/>
+        <Button
+            android:id="@+id/tv_chan_up"
+            android:layout_width="60dp"
+            android:layout_height="90dp"
+            android:text="+"/>
+        <Button
+            android:id="@+id/tv_chan_down"
+            android:layout_width="60dp"
+            android:layout_height="90dp"
+            android:text="-"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="VOLUME"/>
+        <Button
+            android:id="@+id/tv_vol_up"
+            android:layout_width="60dp"
+            android:layout_height="90dp"
+            android:text="+"/>
+        <Button
+            android:id="@+id/tv_vol_down"
+            android:layout_width="60dp"
+            android:layout_height="90dp"
+            android:text="-"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/tv_movements"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_chan_num_789"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:orientation="horizontal"
+        android:padding="2dp">
+
+        <Button
+            android:id="@+id/tv_left"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="64dp"
+            android:max="100"
+            app:icon="@android:drawable/ic_media_previous" />
+
+        <LinearLayout
+            android:id="@+id/tv_vertical_movements"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:orientation="vertical"
+            android:padding="2dp">
+
+            <Button
+                android:id="@+id/tv_up"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="2dp"
+                android:max="100"
+                app:icon="@android:drawable/arrow_up_float" />
+
+            <Button
+                android:id="@+id/tv_ok"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="2dp"
+                android:max="100"
+                android:text="OK" />
+
+            <Button
+                android:id="@+id/tv_down"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="2dp"
+                android:max="100"
+                app:icon="@android:drawable/arrow_down_float" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tv_vertical_movements1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:orientation="vertical">
+            <Button
+                android:id="@+id/tv_right"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="65dp"
+                app:icon="@android:drawable/ic_media_next" />
+
+            <Button
+                android:id="@+id/tv_mute"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginLeft="2dp"
+                app:icon="@android:drawable/ic_lock_silent_mode" />
+    </LinearLayout>
+
+</LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/tv_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp"
+        android:layout_below="@id/tv_movements">
+
+        <Button
+            android:id="@+id/tv_hdmi_1"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="HDMI 1"
+            android:max="100"
+            android:layout_marginTop="2dp"/>
+        <Button
+            android:id="@+id/tv_hdmi_2"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="HDMI 2"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+        <Button
+            android:id="@+id/tv_usb"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="usb"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/tv_btns"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp"
+        android:layout_below="@id/tv_input">
+
+        <Button
+            android:id="@+id/tv_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="AVI"
+            android:max="100"
+            android:layout_marginTop="2dp"/>
+        <Button
+            android:id="@+id/tv_info"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="INFO"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+        <Button
+            android:id="@+id/tv_more"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="MORE"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+    </LinearLayout>
+</RelativeLayout>
+
+
+

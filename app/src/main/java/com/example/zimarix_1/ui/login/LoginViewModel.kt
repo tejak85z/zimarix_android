@@ -27,22 +27,16 @@ import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat.getSystemService
+import com.example.zimarix_1.aes_decrpt
+import com.example.zimarix_1.aes_encrpt
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
-import android.net.wifi.WifiInfo
-
-import androidx.core.content.ContextCompat.getSystemService
-
-import android.net.wifi.WifiManager
-import androidx.core.content.ContextCompat
-import com.example.zimarix_1.AES_decrpt
-import com.example.zimarix_1.AES_encrpt
 import com.example.zimarix_1.getRandomString
 import com.example.zimarix_1.zimarix_global.Companion.appid
 import com.example.zimarix_1.zimarix_global.Companion.appkey
 import com.example.zimarix_1.zimarix_global.Companion.dev_mac
 import com.example.zimarix_1.zimarix_global.Companion.zimarix_server
+import java.io.InputStream
 import java.lang.StringBuilder
 import java.net.NetworkInterface
 import java.util.*
@@ -85,10 +79,9 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
         while(reg_resp == ""){
             Thread.sleep(100)
         }
-        if(reg_resp.contains("OK"))
+        if(reg_resp.contains("SUCCESS"))
             _loginResult.value = LoginResult(success = LoggedInUserView(displayName = username))
         return reg_resp
-
     }
 
     fun loginDataChanged(username: String, password: String) {
@@ -133,99 +126,97 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
         encrypted = cipher.doFinal(data.toByteArray())
         return encrypted
     }
-
-
-
-    lateinit var client : Socket
     fun send_login_data_to_server(username: String, password: String):String{
-        var resp = "OK"
+
+        var resp = "LOGIN FAILURE"
+        val bufferSize = 1024
+        val buffer = ByteArray(bufferSize)
+        var bytesRead: Int
+
         try {
-            client = Socket(zimarix_server, 11113)
+            val client = Socket(zimarix_server, 11113)
             client!!.outputStream.write("LOGIN".toByteArray())
-            Log.i("TAG", "1  =============== ")
             //Get Public Key from Server
             var publickey = ""
-            val bufferReader = BufferedReader(InputStreamReader(client!!.inputStream))
-            while (true) {
-                val line = bufferReader.readLine()
-                if (line == "-----END PUBLIC KEY-----" || line.length == 0)
-                    break
-                publickey += line
-            }
+            val inputStream: InputStream = client.getInputStream()
+            // Read data into the buffer
+            bytesRead = inputStream.read(buffer)
+            // Convert the received bytes to a string (assuming text data)
+            publickey = String(buffer, 0, bytesRead)
+            if (publickey.contains("END PUBLIC KEY")) {
+                val randomKey = getRandomString(16)
+                //Encrypt the Random key with public key and send to server
+                var encrypted: ByteArray? = RSA_encrpt(publickey, randomKey)
+                client!!.outputStream.write(encrypted)
 
-            //Generate a random key in device
-            val randomKey = getRandomString(16)
-            //Encrypt the Random key with public key and send to server
-            var encrypted: ByteArray? = RSA_encrpt(publickey,randomKey)
-            client!!.outputStream.write(encrypted)
-
-            //Receive server AES key which is encrypted with random key
-            val enc_ser_key = bufferReader.readLine()
-            val decoded_key = Base64.decode(enc_ser_key, Base64.NO_PADDING)
-
-            appkey = AES_decrpt(randomKey,decoded_key)
-
-            val reg_data = username + "," + password +','+ dev_mac
-            val ciphertext: ByteArray = AES_encrpt(appkey, reg_data)
-
-            client!!.outputStream.write(ciphertext)
-
-            resp = bufferReader.readLine()
-            if(resp.contains("OK")){
-                appid = resp.split(",")[1]
-                resp = "OK"
-            }else if(resp.contains("NU")){
-                resp = "Invalid user. Register to create new profile"
-            }else if(resp.contains("NP")){
-                resp = "Wrong Password"
+                bytesRead = inputStream.read(buffer)
+                if(bytesRead == 16) {
+                    appkey = aes_decrpt(randomKey, "abcdefghijklmnop", buffer.copyOf(bytesRead))
+                    val reg_data = username + "," + password +','+ dev_mac
+                    val ciphertext: ByteArray = aes_encrpt(appkey, "abcdefghijklmnop", reg_data)
+                    client!!.outputStream.write(ciphertext)
+                    bytesRead = inputStream.read(buffer)
+                    val login_resp = aes_decrpt(appkey, "abcdefghijklmnop", buffer.copyOf(bytesRead))
+                    Log.d("debug ", " ------------------received login resp $login_resp\n")
+                    val param = login_resp.split(",")
+                    if (param.size >= 2){
+                        if (param[0] != "-1") {
+                            appid = param[0]
+                        }
+                        resp = param[1]
+                    }
+                }
             }
             client!!.close()
         }catch (t: SocketException){
-            resp = "Unable to connect to server. Check network"
+            resp = "UNABLE TO CONNECT TO SERVER. PLEASE TRY AFTER SOMETIME"
         }
         return resp
     }
 
+    lateinit var client : Socket
     fun send_reg_data_to_server(username: String, password: String, mobile: String):String{
-        var resp = "OK"
+        var resp = "FAILED TO CONNECT TO SERVER"
+        val bufferSize = 1024
+        val buffer = ByteArray(bufferSize)
+        var bytesRead: Int
         try {
             client = Socket(zimarix_server, 11113)
             client!!.outputStream.write("REG".toByteArray())
 
             //Get Public Key from Server
             var publickey = ""
-            val bufferReader = BufferedReader(InputStreamReader(client!!.inputStream))
-            while (true) {
-                val line = bufferReader.readLine()
-                if (line == "-----END PUBLIC KEY-----" || line.length == 0)
-                    break
-                publickey += line
-            }
+            val inputStream: InputStream = client.getInputStream()
+            // Read data into the buffer
+            bytesRead = inputStream.read(buffer)
+            // Convert the received bytes to a string (assuming text data)
+            publickey = String(buffer, 0, bytesRead)
+            if (publickey.contains("END PUBLIC KEY")) {
+                //Generate a random key in device
+                val randomKey = getRandomString(16)
+                //Encrypt the Random key with public key and send to server
+                var encrypted: ByteArray? = RSA_encrpt(publickey, randomKey)
+                client!!.outputStream.write(encrypted)
 
-            //Generate a random key in device
-            val randomKey = getRandomString(16)
-            //Encrypt the Random key with public key and send to server
-            var encrypted: ByteArray? = RSA_encrpt(publickey,randomKey)
-            client!!.outputStream.write(encrypted)
-            //Receive server AES key which is encrypted with random key
-            val enc_ser_key = bufferReader.readLine()
-            val decoded_key = Base64.decode(enc_ser_key, Base64.NO_PADDING)
-            appkey = AES_decrpt(randomKey,decoded_key).split(",")[0]
+                bytesRead = inputStream.read(buffer)
+                if(bytesRead == 16) {
+                    appkey = aes_decrpt(randomKey, "abcdefghijklmnop", buffer.copyOf(bytesRead))
+                    Log.d("debug ", " ------------------received app key  $appkey encrypted with $randomKey\n")
+                    val reg_data = username + "," + password + "," + mobile +','+dev_mac
+                    val ciphertext: ByteArray = aes_encrpt(appkey,"abcdefghijklmnop", reg_data)
+                    client!!.outputStream.write(ciphertext)
 
-            val reg_data = username + "," + password + "," + mobile +','+dev_mac
-            val ciphertext: ByteArray = AES_encrpt(appkey, reg_data)
-            client!!.outputStream.write(ciphertext)
-            Log.d("debug ", " ======  ff $appkey  ${reg_data.length} $reg_data ${ciphertext.size}")
-            resp = bufferReader.readLine()
-            if(!resp.contains("OK")){
-                client!!.close()
-                if (resp.contains("UE")){
-                    resp = "Email "+username+" is registered already"
-                }else if(resp.contains("ME")){
-                    resp = "Mobile "+mobile+" is registered already"
+                    bytesRead = inputStream.read(buffer)
+                    Log.d("debug ", " ------------------received $bytesRead bytes\n")
+                    resp = aes_decrpt(appkey,"abcdefghijklmnop", buffer.copyOf(bytesRead))
+                    Log.d("debug ", " received ======  ff $resp")
+                    if(!resp.contains("OTP")){
+                        client!!.close()
+                    }
                 }
             }
         }catch (t: SocketException){
+            Log.d("debug ", " ------------------socket exception in registration connect failure\n")
             resp = "Unable to connect to server. Check network"
         }
         return resp
@@ -233,23 +224,22 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
 
     fun verify_otp(otp_msg: String): String {
         var resp = ""
+        val bufferSize = 1024
+        val buffer = ByteArray(bufferSize)
         try {
             //Encrypt OTP string
-            val ciphertext: ByteArray = AES_encrpt(appkey, otp_msg)
+            val ciphertext: ByteArray = aes_encrpt(appkey,"abcdefghijklmnop", otp_msg)
             client!!.outputStream.write(ciphertext)
-
-            val bufferReader = BufferedReader(InputStreamReader(client!!.inputStream))
-            resp = bufferReader.readLine()
-
-            if(resp.contains("IV")){
-                resp = "Invalid OTP"
-            }else if(resp.contains("IM")){
-                resp = "Invalid Mobile OTP"
-            }else if(resp.contains("IE")){
-                resp = "Invalid Email OTP"
-            }else if(resp.contains("OK")){
-                appid = resp.split(",")[1]
-                resp="OK"
+            val inputStream: InputStream = client.getInputStream()
+            val bytesRead = inputStream.read(buffer)
+            val reg_resp = aes_decrpt(appkey,"abcdefghijklmnop", buffer.copyOf(bytesRead))
+            Log.d("debug ", " received ======  ff $reg_resp")
+            val param = reg_resp.split(",")
+            if (param.size >= 2){
+                if (param[0] != "-1") {
+                    appid = param[0]
+                }
+                resp = param[1]
             }
         } catch (t: SocketException){
             resp = "Unable to connect to server. Check network"
@@ -284,6 +274,10 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
 
     fun otp_validate(mobile_otp: String, email_otp: String): String {
          ser_resp = ""
+        if (mobile_otp.length > 6)
+            return "INVALID MOBILE OTP"
+        if (email_otp.length > 6)
+            return "INVALID EMAIL OTP"
          val reg_data = mobile_otp + "," + email_otp+","
         viewModelScope.launch(Dispatchers.IO){
             ser_resp = verify_otp(reg_data)

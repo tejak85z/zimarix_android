@@ -22,18 +22,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.zimarix_1.*
 import com.example.zimarix_1.databinding.FragmentMainBinding
-import com.example.zimarix_1.zimarix_global.Companion.channelId
-import com.example.zimarix_1.zimarix_global.Companion.curr_device
 import com.example.zimarix_1.zimarix_global.Companion.dev_config
-import com.example.zimarix_1.zimarix_global.Companion.notificationManager
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.lang.IllegalArgumentException
-import java.net.Socket
 import java.net.SocketException
-
-//import com.example.zimarix_1.zimarix_global.Companion.builder
-//import com.example.zimarix_1.zimarix_global.Companion.notificationManager
 
 class SettingsFragment : Fragment() {
 
@@ -111,8 +101,6 @@ class SettingsFragment : Fragment() {
                 pioneers = pioneers + "Bluetooth Speaker,enable remote support , upgrade ".split(",")
                 listView.setOnItemClickListener(AdapterView.OnItemClickListener { arg0, arg1, position, arg3 ->
                     if(pioneers[position] == "Offline Wake Word Config"){
-                        val intent = Intent(getActivity(), Wakeword::class.java)
-                        startActivity(intent)
                         //process_wakeword_settings(configs[position])
                     } else if (pioneers[position] == "Power Save Settings"){
                         power_save_dialog(configs[position])
@@ -1474,15 +1462,18 @@ class SettingsFragment : Fragment() {
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
         try {
+            /*
             if(zimarix_global.controller_ips[curr_device] == "0" || zimarix_global.controller_ips[curr_device].length < 7){
                 return "INVALID CONFIG"
             }
             val client = Socket(zimarix_global.controller_ips[curr_device], 20009)
-            val enc_probe = AES_encrpt(zimarix_global.controller_keys[curr_device],data)
+            val enc_probe = aes_encrpt(zimarix_global.controller_keys[curr_device],"abcdefghijklmnop",data)
             client!!.outputStream.write(enc_probe)
             val bufferReader = BufferedReader(InputStreamReader(client!!.inputStream))
             resp = bufferReader.readLine()
             client.close()
+
+             */
         }catch (t: SocketException){
 
         }
@@ -1490,6 +1481,7 @@ class SettingsFragment : Fragment() {
     }
 
     fun get_service_config(data : String): String {
+        /*
         var resp = "FAIL"
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
@@ -1499,14 +1491,14 @@ class SettingsFragment : Fragment() {
             }
             val req = "G,"+data
             val client = Socket(zimarix_global.controller_ips[curr_device], 20009)
-            val enc_probe = AES_encrpt(zimarix_global.controller_keys[curr_device],req)
+            val enc_probe = aes_encrpt(zimarix_global.controller_keys[curr_device],"abcdefghijklmnop",req)
             client!!.outputStream.write(enc_probe)
             val bufferReader = BufferedReader(InputStreamReader(client!!.inputStream))
             val buff = bufferReader.readLine()
             if (buff != null && buff.length > 0 || buff != "FAIL") {
                 try {
                     val decoded_buff = Base64.decode(buff, Base64.NO_PADDING)
-                    val data = AES_decrpt(zimarix_global.controller_keys[curr_device], decoded_buff)
+                    val data = aes_decrpt(zimarix_global.controller_keys[curr_device],"abcdefghijklmnop", decoded_buff)
                     val param = data.split(",")
                     if(param[0] == "G") {
                         resp = data
@@ -1515,9 +1507,8 @@ class SettingsFragment : Fragment() {
                 }
             }
             client.close()
-        }catch (t: SocketException){
 
-        }
-        return resp
+         */
+        return "resp"
     }
 }

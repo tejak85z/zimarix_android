@@ -62,15 +62,17 @@ class btspeaker : AppCompatActivity() {
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
         try {
-            if(zimarix_global.controller_ips[zimarix_global.curr_device] == "0" || zimarix_global.controller_ips[zimarix_global.curr_device].length < 7){
+            /*if(zimarix_global.controller_ips[zimarix_global.curr_device] == "0" || zimarix_global.controller_ips[zimarix_global.curr_device].length < 7){
                 return "INVALID CONFIG"
             }
             val client = Socket(zimarix_global.controller_ips[zimarix_global.curr_device], 20009)
-            val enc_probe = AES_encrpt(zimarix_global.controller_keys[zimarix_global.curr_device],data)
+            val enc_probe = aes_encrpt(zimarix_global.controller_keys[zimarix_global.curr_device],"abcdefghijklmnop",data)
             client!!.outputStream.write(enc_probe)
             val bufferReader = BufferedReader(InputStreamReader(client!!.inputStream))
             resp = bufferReader.readLine()
             client.close()
+
+             */
         }catch (t: SocketException){
 
         }

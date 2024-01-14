@@ -1,0 +1,194 @@
+<!-- item_device_config.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="LED BRIGHTNESS"
+        android:layout_marginTop="6dp"/>
+    <SeekBar
+        android:id="@+id/led_brightness"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:max="100"
+        android:layout_marginTop="1dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="6dp">
+        <TextView
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:text="VOLUME    "/>
+        <TextView
+            android:id="@+id/mic_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="    MIC:" />
+    </LinearLayout>
+    <SeekBar
+        android:id="@+id/volume"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:max="100"
+        android:layout_marginTop="1dp"/>
+    <Switch
+        android:id="@+id/screen"
+        android:layout_width="120dp"
+        android:layout_height="30dp"
+        android:text="SCREEN"
+        android:max="100"
+        android:layout_marginTop="6dp"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="6dp">
+        <Switch
+            android:id="@+id/monitor"
+            android:layout_width="120dp"
+            android:layout_height="30dp"
+            android:text="MONITOR"
+            android:max="100" />
+
+        <Button
+            android:id="@+id/monitorsettings"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:text="MONITOR CONFIG"
+            android:max="100"
+            android:layout_marginLeft="20dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/ps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="6dp">
+        <Switch
+            android:id="@+id/powersave"
+            android:layout_width="150dp"
+            android:layout_height="30dp"
+            android:text="POWER SAVE"
+            android:max="100"/>
+        <Switch
+            android:id="@+id/powersave_autoon"
+            android:layout_width="130dp"
+            android:layout_height="50dp"
+            android:text="    AUTO SWITCH ON"
+            android:max="100"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_below="@id/ps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="6dp">
+        <TextView
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:text="CURRENT POWER SAVE TIMEOUT   "/>
+        <EditText
+            android:id="@+id/timeout"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:max="100"/>
+        <Button
+            android:id="@+id/ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="OK"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/wakewords"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/ps"
+        android:layout_marginTop="6dp">
+        <Button
+            android:id="@+id/alexa"
+            android:layout_width="130dp"
+            android:layout_height="60dp"
+            android:text="ALEXA"
+            android:max="100"
+            android:layout_marginTop="6dp"/>
+        <Button
+            android:id="@+id/jarvis"
+            android:layout_width="130dp"
+            android:layout_height="60dp"
+            android:text="JARVIS"
+            android:max="100"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="6dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/connectivity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/wakewords"
+        android:layout_marginTop="6dp">
+        <Button
+            android:id="@+id/bluetooth"
+            android:layout_width="130dp"
+            android:layout_height="60dp"
+            android:text="BLUETOOTH SPEAKER"
+            android:max="100"
+            android:layout_marginTop="6dp"/>
+        <Button
+            android:id="@+id/wifi"
+            android:layout_width="130dp"
+            android:layout_height="60dp"
+            android:text="WIFI SETTINGS"
+            android:max="100"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="6dp"/>
+    </LinearLayout>
+    <Button
+        android:id="@+id/camera"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="CAMERA AND GESTURE SETTINGS"
+        android:max="100"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="6dp"
+        android:layout_below="@id/connectivity"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/wakewords"
+        android:layout_marginTop="6dp">
+        <Button
+            android:id="@+id/upgrade"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="UPGRADE"
+            android:max="100"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="6dp"
+            android:layout_below="@id/connectivity"
+            />
+        <Button
+            android:id="@+id/reboot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DEVICE REBOOT"
+            android:max="100"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="6dp"
+            android:layout_below="@id/upgrade"
+            />
+    </LinearLayout>
+</LinearLayout>

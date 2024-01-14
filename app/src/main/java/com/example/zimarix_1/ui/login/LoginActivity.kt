@@ -51,7 +51,7 @@ class LoginActivity : AppCompatActivity() {
         loginViewModel = ViewModelProvider(this, LoginViewModelFactory())
             .get(LoginViewModel::class.java)
 
-        dev_mac = get_device_mac()
+        dev_mac = get_device_mac(this)
 
         val prefs = getSharedPreferences(getString(R.string.dev_encryption_key), MODE_PRIVATE)
         val ret = load_app_id_and_key(prefs)
@@ -121,7 +121,8 @@ class LoginActivity : AppCompatActivity() {
 
             login.setOnClickListener {
                 val ret = loginViewModel.login(username.text.toString(), password.text.toString())
-                if(ret.contains("OK")){
+                Toast.makeText(this@LoginActivity, ret, Toast.LENGTH_SHORT).show()
+                if(ret.contains("SUCCESS")){
                     val editor = getSharedPreferences(getString(R.string.dev_encryption_key), MODE_PRIVATE).edit()
                     val enc_params = loginViewModel.encryptkey()
                     val enciv = Base64.encodeToString(enc_params.first, Base64.DEFAULT);
@@ -184,12 +185,11 @@ class LoginActivity : AppCompatActivity() {
                                 password1.text.toString(),
                                 name.text.toString(),
                                 mobile.text.toString())
-                            if(ret.contains("OK")) {
+                            Toast.makeText(this@LoginActivity, ret, Toast.LENGTH_SHORT).show()
+                            if(ret.contains("OTP")) {
                                 openotpdialog()
                                 dialog.dismiss()
                                 return@setOnClickListener
-                            }else{
-                                Toast.makeText(this@LoginActivity, ret, Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
@@ -229,7 +229,8 @@ class LoginActivity : AppCompatActivity() {
                 val motp = mobile_otp.text.toString()
                 val eotp = email_otp.text.toString()
                 val ret = loginViewModel.otp_validate(motp,eotp)
-                if(ret == "OK") {
+                if(ret.contains("SUCCESS")) {
+                    Toast.makeText(this@LoginActivity, ret, Toast.LENGTH_SHORT).show()
                     val editor = getSharedPreferences(getString(R.string.dev_encryption_key), MODE_PRIVATE).edit()
                     val enc_params = loginViewModel.encryptkey()
                     val enciv = Base64.encodeToString(enc_params.first, Base64.DEFAULT);
@@ -243,6 +244,8 @@ class LoginActivity : AppCompatActivity() {
                     startActivity(intent)
                     finish()
                     return@setOnClickListener
+                }else{
+                    Toast.makeText(this@LoginActivity, ret, Toast.LENGTH_SHORT).show()
                 }
             }
         }

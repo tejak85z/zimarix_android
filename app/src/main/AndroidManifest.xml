@@ -26,6 +26,33 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Zimarix_1">
         <activity
+            android:name=".Ir_Music_Remote"
+            android:exported="false" />
+        <activity
+            android:name=".Ir_Smart_Light_Remote"
+            android:exported="false" />
+        <activity
+            android:name=".Ir_Fan_Remote"
+            android:exported="false" />
+        <activity
+            android:name=".Ir_Switch_Remote"
+            android:exported="false" />
+        <activity
+            android:name=".Ir_Ac_Remote"
+            android:exported="false" />
+        <activity
+            android:name=".Ir_Tv_Remote"
+            android:exported="false" />
+        <activity
+            android:name=".ir_switches"
+            android:exported="false" />
+        <activity
+            android:name=".io_switches"
+            android:exported="false" />
+        <activity
+            android:name=".DevConfig"
+            android:exported="false" />
+        <activity
             android:name=".livestream"
             android:exported="false" />
         <activity
@@ -35,22 +62,7 @@
             android:name=".avsregistration"
             android:exported="false" />
         <activity
-            android:name=".afterNotification"
-            android:exported="false" />
-        <activity
-            android:name=".Wakeword"
-            android:exported="false" />
-        <activity
-            android:name=".Devsettings"
-            android:exported="false" />
-        <activity
             android:name=".addnewcontroller"
-            android:exported="false" />
-        <activity
-            android:name=".addnewremote"
-            android:exported="false" />
-        <activity
-            android:name=".addnewdevice"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DevConfig">
+
+    <ProgressBar
+        android:id="@+id/configprogressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
+
+    <LinearLayout
+        android:id="@+id/switch_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+        <Button
+            android:id="@+id/io"
+            android:layout_width="130dp"
+            android:layout_height="60dp"
+            android:text="SWITCHES"
+            android:max="100"
+            android:layout_marginTop="6dp"/>
+        <Button
+            android:id="@+id/ir"
+            android:layout_width="130dp"
+            android:layout_height="60dp"
+            android:text="REMOTES"
+            android:max="100"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="6dp"/>
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/settingsrecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:layout_below="@id/switch_layout"/>
+</RelativeLayout>

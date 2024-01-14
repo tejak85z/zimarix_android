@@ -1,47 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+    <Button
+        android:id="@+id/add_controller"
+        android:layout_width="175dp"
+        android:layout_height="70dp"
+        android:text="Add Controller"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="6dp"/>
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/view_controller"
+        android:layout_width="175dp"
+        android:layout_height="70dp"
+        android:text="View Controllers"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="6dp"/>
+
+    <Button
+        android:id="@+id/stream"
+        android:layout_width="175dp"
+        android:layout_height="70dp"
+        android:text="stream"
+        android:layout_below="@id/add_controller"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="6dp"/>
+
+    <RadioGroup
+        android:id="@+id/radio_group"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
-        android:theme="@style/Theme.Zimarix_1.AppBarOverlay">
+        android:layout_below="@id/stream"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="6dp">
 
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabs"
-            android:layout_width="match_parent"
+        <RadioButton
+            android:id="@+id/radioButtonOption1"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:tabIndicatorColor="#80FFFFFF"/>
-    </com.google.android.material.appbar.AppBarLayout>
+            android:text="Show All" />
 
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/view_pager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" >
-    </androidx.viewpager.widget.ViewPager>
+        <RadioButton
+            android:id="@+id/radioButtonOption2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="On Switches" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
+        <RadioButton
+            android:id="@+id/radioButtonOption3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="IR Switches" />
+    </RadioGroup>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="250dp"
+        android:layout_height="400dp"
+        android:layout_below="@+id/stream"
+        android:layout_marginTop="5dp"
+        android:padding="16dp" />
+
+    <ProgressBar
+        android:id="@+id/progressBar1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginBottom="16dp"
-        app:srcCompat="@android:drawable/ic_input_add"
-        android:layout_marginRight="@dimen/fab_margin" />
+        android:layout_centerInParent="true" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center|end"
-        android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginRight="@dimen/fab_margin"
-        android:layout_marginBottom="10dp"
-        app:srcCompat="@android:drawable/ic_menu_rotate" />
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+
+</RelativeLayout>
