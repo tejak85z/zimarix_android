@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activities.MonitorActivity">
+
+    <ProgressBar
+        android:id="@+id/monitor_progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
+
+    <TextView
+        android:id="@+id/monitor_config_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:max="100"
+        android:layout_marginLeft="80dp"
+        android:text="MONITOR CONFIG"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:id="@+id/monitor_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/monitor_config_title">
+        <Switch
+            android:id="@+id/monitor"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="50dp"
+            android:text="MONITOR ENABLE"
+            android:max="100" />
+
+        <Button
+            android:id="@+id/monitorsettings"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="50dp"
+            android:text="MONITOR CONFIG"
+            android:max="100"
+            android:layout_marginLeft="20dp"/>
+    </LinearLayout>
+    <TextView
+        android:id="@+id/monitor_log_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:max="100"
+        android:layout_marginLeft="80dp"
+        android:text="MONITORING LOGS"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_below="@id/monitor_layout"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/motion_event_log"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:layout_below="@id/monitor_log_title"/>
+</RelativeLayout>

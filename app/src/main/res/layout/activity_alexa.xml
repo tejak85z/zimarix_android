@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    tools:context=".Activities.Alexa">
+
+    <TextView
+        android:id="@+id/alexatitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="ALEXA"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/alexarecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/alexatitle"
+        android:padding="16dp" />
+
+    <LinearLayout
+        android:id="@+id/buttonsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/alexarecyclerView"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/listen_stop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/alexa_t"
+                android:layout_width="120dp"
+                android:layout_height="70dp"
+                android:layout_marginEnd="4dp"
+                android:layout_marginRight="4dp"
+                android:layout_weight="1"
+                android:backgroundTint="#3498db"
+                android:padding="12dp"
+                android:text="LISTEN"
+                android:textColor="@android:color/white"
+                app:icon="@android:drawable/presence_audio_online" />
+            <Button
+                android:id="@+id/alexa_s"
+                android:layout_width="120dp"
+                android:layout_height="70dp"
+                android:layout_marginEnd="4dp"
+                android:layout_marginRight="4dp"
+                android:layout_weight="1"
+                android:backgroundTint="#A40E0E"
+                android:padding="12dp"
+                android:text="STOP"
+                android:textColor="@android:color/white"
+                app:icon="@android:drawable/ic_notification_overlay" />
+        </LinearLayout>
+        <!-- Add more buttons here as needed -->
+        <LinearLayout
+            android:id="@+id/play_pause"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/alexa_4"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="70dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginLeft="4dp"
+                android:backgroundTint="#0E81A4"
+                android:textColor="@android:color/white"
+                app:icon="@android:drawable/ic_media_previous" />
+            <Button
+                android:id="@+id/alexa_1"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="70dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginLeft="4dp"
+                android:backgroundTint="#2196F3"
+                android:padding="12dp"
+                app:icon="@android:drawable/ic_media_play" />
+
+            <Button
+                android:id="@+id/alexa_2"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="70dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginLeft="4dp"
+                android:backgroundTint="#A40E0E"
+                android:padding="12dp"
+                app:icon="@android:drawable/ic_media_pause" />
+            <Button
+                android:id="@+id/alexa_3"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="70dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:layout_marginLeft="4dp"
+                android:backgroundTint="#0EA470"
+                android:padding="12dp"
+                app:icon="@android:drawable/ic_media_next" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/alexa_z"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttonsLayout"
+        android:layout_centerHorizontal="true"
+        android:text="Re-Authorise/RESET"
+        android:textColor="@android:color/white"
+        android:backgroundTint="#3498db"
+        android:padding="12dp"
+        android:layout_marginTop="16dp"/>
+    <ProgressBar
+        android:id="@+id/alexaprogressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/alexa_z"
+        android:layout_alignStart="@+id/alexa_z"
+        android:layout_alignLeft="@+id/alexa_z"
+        android:layout_alignEnd="@+id/alexa_z"
+        android:layout_alignRight="@+id/alexa_z"
+        android:layout_marginStart="72dp"
+        android:layout_marginLeft="72dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="72dp"
+        android:layout_marginRight="72dp" />
+
+</RelativeLayout>

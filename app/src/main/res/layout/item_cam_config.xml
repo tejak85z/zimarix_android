@@ -1,0 +1,81 @@
+<!-- item_device_config.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="6dp">
+
+    <!-- First Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Switch
+            android:id="@+id/cam_enable"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="#3498db"
+            android:text="CAM ENABLE"/>
+        <Switch
+            android:id="@+id/gesture_enable"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="#3498db"
+            android:text="GESTURE ENABLE"/>
+    </LinearLayout>
+    <!-- Second Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <Switch
+            android:id="@+id/use_motion"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="#3498db"
+            android:text="ENABLE CAM MOTION DETECTION"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/cam_or_motion_select"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_weight="1"
+                android:backgroundTint="#3498db"
+                android:text=" MOTION/FACE DETECTION"/>
+            <Spinner
+                android:id="@+id/cam_motion_type"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="60dp"/>
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="MOTION SENSITIVITY"
+            android:layout_marginTop="6dp"/>
+        <SeekBar
+            android:id="@+id/motion_sensitivity"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:max="100"
+            android:layout_marginTop="1dp"/>
+
+    </LinearLayout>
+</LinearLayout>

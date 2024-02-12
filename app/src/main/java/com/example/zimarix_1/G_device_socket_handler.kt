@@ -5,8 +5,8 @@ import android.os.AsyncTask
 import android.os.Handler
 import android.util.Log
 import android.view.View
-import android.widget.Switch
 import android.widget.Toast
+import com.example.zimarix_1.Activities.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -15,42 +15,65 @@ import java.io.InputStream
 import java.net.Socket
 import java.net.SocketException
 import kotlin.experimental.or
-
-fun dev_req(id: Int, cmd: String): String {
+/* Encrypts Request and Sends  to device over local socket
+   Validates received response, decrypts and returns
+   Takes 2 arguments
+        - Index of device over the device array
+        - Cmd : command request
+   Returns : "FAIL" on failure
+             decrypted response on success
+ */
+fun dev_req(dev_index: Int, cmd: String): String {
     val bufferSize = 1024*50
     val buffer = ByteArray(bufferSize)
     var bytesRead: Int
-    var resp = "FAIL"
-    if (zimarix_global.devices[id].client == null){
+    var resp = ""
+    // Check if device local socket is initialised
+    if (zimarix_global.devices[dev_index].client == null){
         return resp
     }
-    val enc_data = aes_encrpt(zimarix_global.devices[id].key, zimarix_global.devices[id].iv, cmd)
-    synchronized(zimarix_global.devices[id].lock) {
+    // encrypt the request
+    val enc_data = aes_encrpt(zimarix_global.devices[dev_index].key, zimarix_global.devices[dev_index].iv, cmd)
+    // Make sure 1 request is called at a time
+    synchronized(zimarix_global.devices[dev_index].lock) {
         try {
-            zimarix_global.devices[id].client?.outputStream?.write(enc_data)
-            bytesRead = zimarix_global.devices[id].inputStream.read(buffer)
+            // Write to device local socket
+            zimarix_global.devices[dev_index].client?.outputStream?.write(enc_data)
+            // get resp from local socket
+            bytesRead = zimarix_global.devices[dev_index].inputStream.read(buffer)
             if (bytesRead % 16 == 0) {
-                resp = aes_decrpt( zimarix_global.devices[id].key,
-                        zimarix_global.devices[id].iv,
+                // Validate received data len and decrypt data
+                resp = aes_decrpt( zimarix_global.devices[dev_index].key,
+                        zimarix_global.devices[dev_index].iv,
                         buffer.copyOf(bytesRead))
+                // return decrypted data
                 return resp
             }
         }catch (t: SocketException){
-            Log.d("debug ", " -------closing socket at 2")
-            zimarix_global.devices[id].client = null
+            zimarix_global.devices[dev_index].client = null
         }
     }
     return resp
 }
 
+/* Send request to device over local socket
+   Takes 3 arguments
+        - Index of device over the device array
+        - Cmd : command String to send
+        - activity : Activity to update
+                        progressbar
+                        Toast
+                        task_in_progress
+ */
 class Send_cmd(
-    private val value: Int,
+    private val dev_index: Int,
     private val cmd: String,
     private val activity: update_params
 ) : AsyncTask<Void, Void, String>() {
 
     private var resp = "FAIL"
     override fun onPreExecute() {
+        // update progress bar to visible before operation starts
         activity.progressBar.visibility = View.VISIBLE
     }
 
@@ -59,8 +82,8 @@ class Send_cmd(
             return "Previous Request In Progress"
         }else {
             activity.isTaskInProgress = true
-            if (zimarix_global.devices[value].client != null) {
-                resp = dev_req(value, cmd)
+            if (zimarix_global.devices[dev_index].client != null) {
+                resp = dev_req(dev_index, cmd)
             } else {
                 return "FAIL"
             }
@@ -186,6 +209,54 @@ fun check_and_update_ir(device_info_index: Int, did: Int) {
     }
 }
 
+fun check_and_update_cluster_switches(device_info_index: Int, did: Int) {
+    val resp = dev_req(device_info_index, "CFG,CLS,GET,")
+    val ports = resp.split(",")
+    var update = 0
+
+    // Collect the ids from the response
+    val responseIds = ports.filter { it.split("_").size > 2 }.map { it.split("_")[0] }
+    val Gswitch_len = GSwitches.size
+    // Remove entries from GSwitches with common did and not in response
+    GSwitches.removeAll { it.did == did && it.id.toInt() >= 500 && it.id !in responseIds }
+    if (Gswitch_len != GSwitches.size){
+        update = 1
+    }
+
+    if (ports.size > 0) {
+        ports.forEach {
+            val param = it.split("_")
+            if (param.size > 2) {
+                val matchingSwitch: sw_params? = GSwitches.find {
+                    it.id == param[0] && it.did == did
+                }
+                if (matchingSwitch != null) {
+                    if (matchingSwitch.name != param[1]) {
+                        matchingSwitch.name = param[1]
+                        update = 1
+                    }
+                    matchingSwitch.type = 13
+                    //if (matchingSwitch.params != param.subList(2, param.size).filter { it.isNotEmpty() }) {
+                        matchingSwitch.params =
+                            param.subList(2, param.size).filter { it.isNotEmpty() }
+                        update = 1
+                    //}
+
+                } else {
+                    GSwitch_adapter.addSwitch(device_info_index, did, param[0], 10, param[1])
+                    update = 1
+                }
+            }
+        }
+    }
+    if (update == 1) {
+        GlobalScope.launch(Dispatchers.Main) {
+            // Update UI here
+            GSwitch_adapter.update()
+        }
+    }
+}
+
 fun device_handler(handler: Handler, mainActivity: MainActivity) {
     val bufferSize = 1024*50
     val buffer = ByteArray(bufferSize)
@@ -219,7 +290,7 @@ fun device_handler(handler: Handler, mainActivity: MainActivity) {
                                                 if (i > 30)
                                                     i = 0
                                                 if (i%10 == 0) {
-                                                    if (mainActivity.active == 1) {
+                                                    if (mainActivity.active == true) {
                                                         check_and_update_switches(
                                                             device_info_index,
                                                             it.id
@@ -228,6 +299,11 @@ fun device_handler(handler: Handler, mainActivity: MainActivity) {
                                                             device_info_index,
                                                             it.id
                                                         )
+                                                        check_and_update_cluster_switches(
+                                                            device_info_index,
+                                                            it.id
+                                                        )
+
                                                     }
                                                 }
                                                 update_port_info(device_info_index)

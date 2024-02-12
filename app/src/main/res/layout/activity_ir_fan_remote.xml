@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Ir_Fan_Remote">
+    tools:context=".ir_remotes.Ir_Fan_Remote">
     <ProgressBar
         android:id="@+id/fnprogressBar"
         android:layout_width="wrap_content"
@@ -31,5 +31,142 @@
             android:layout_marginTop="6dp"
             android:layout_marginLeft="10dp"
             android:layout_marginStart="10dp" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/fn_num_123"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp"
+        android:layout_below="@id/fn_on_off">
+
+        <Button
+            android:id="@+id/fn_1"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="1"
+            android:max="100"
+            android:layout_marginTop="2dp"/>
+        <Button
+            android:id="@+id/fn_2"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="2"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+        <Button
+            android:id="@+id/fn_3"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="3"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/fn_num_456"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp"
+        android:layout_below="@id/fn_num_123">
+
+        <Button
+            android:id="@+id/fn_4"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="4"
+            android:max="100"
+            android:layout_marginTop="2dp"/>
+        <Button
+            android:id="@+id/fn_5"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="5"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+        <Button
+            android:id="@+id/fn_6"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="6"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/fn_num_789"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp"
+        android:layout_below="@id/fn_num_456">
+
+        <Button
+            android:id="@+id/fn_7"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="7"
+            android:max="100"
+            android:layout_marginTop="2dp"/>
+        <Button
+            android:id="@+id/fn_8"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="8"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+        <Button
+            android:id="@+id/fn_9"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="9"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/fn_num_0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp"
+        android:layout_below="@id/fn_num_789">
+
+        <Button
+            android:id="@+id/fn_0"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="0"
+            android:max="100"
+            android:layout_marginTop="2dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/chan_up_down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="20dp"
+        android:layout_below="@id/fn_on_off"
+        android:layout_toRightOf="@id/fn_num_123">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SPEED"/>
+        <Button
+            android:id="@+id/fn_up"
+            android:layout_width="60dp"
+            android:layout_height="90dp"
+            android:text="+"/>
+        <Button
+            android:id="@+id/fn_down"
+            android:layout_width="60dp"
+            android:layout_height="90dp"
+            android:text="-"/>
+
     </LinearLayout>
 </RelativeLayout>

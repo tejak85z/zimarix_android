@@ -1,7 +1,11 @@
 package com.example.zimarix_1
 
+import android.util.Base64
 import android.util.Log
+import getKey
 import java.lang.Exception
+import java.security.KeyFactory
+import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -68,4 +72,32 @@ fun aes_decrpt_byte(key: String, iv: String, data: ByteArray):ByteArray{
     }
     return "".toByteArray()
 }
+
+fun decryptData(ivBytes: ByteArray, data: ByteArray): String{
+    val cipher = Cipher.getInstance("AES/CBC/NoPadding")
+    val spec = IvParameterSpec(ivBytes)
+
+    cipher.init(Cipher.DECRYPT_MODE, getKey(), spec)
+    return cipher.doFinal(data).toString(Charsets.UTF_8).trim()
+}
+
 ///////////////// RSA encryption calls //////////////////////////////
+
+fun RSA_encrpt(publickey: String, data: String):ByteArray{
+    var publicKy = publickey.replace("\\r".toRegex(), "")
+        .replace("\\n".toRegex(), "")
+        //.replace(System.lineSeparator().toRegex(), "")
+        .replace("-----BEGIN PUBLIC KEY-----", "")
+        .replace("-----END PUBLIC KEY-----", "")
+
+    //Encrypt the data with public key
+    var encrypted: ByteArray? = null
+    val publicBytes = Base64.decode(publicKy, Base64.DEFAULT)
+    val keySpec = X509EncodedKeySpec(publicBytes)
+    val keyFactory = KeyFactory.getInstance("RSA")
+    val pubKey = keyFactory.generatePublic(keySpec)
+    val cipher = Cipher.getInstance("RSA/ECB/PKCS1PADDING") //or try with "RSA"
+    cipher.init(Cipher.ENCRYPT_MODE, pubKey)
+    encrypted = cipher.doFinal(data.toByteArray())
+    return encrypted
+}

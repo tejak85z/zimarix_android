@@ -1,0 +1,31 @@
+<!-- item_device_config.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="6dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Gesture Icon -->
+        <ImageButton
+            android:id="@+id/SwitchIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="Button description"
+            android:onClick="buttonClicked"
+            android:src="@mipmap/fan" />
+
+        <Switch
+            android:id="@+id/SwitchBox"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="Switch"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+</LinearLayout>

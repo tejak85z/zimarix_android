@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activities.channels">
+    <ProgressBar
+        android:id="@+id/channels_progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
+    <LinearLayout
+        android:id="@+id/switch_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+        <Button
+            android:id="@+id/add_channels"
+            android:layout_width="130dp"
+            android:layout_height="60dp"
+            android:text="ADD CHANNEL"
+            android:max="100"
+            android:layout_marginTop="6dp"/>
+    </LinearLayout>
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/switch_layout"
+        android:layout_margin="6dp">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/channelrecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:scrollbars="vertical"
+            android:scrollbarSize="10dp"
+            android:scrollbarFadeDuration="@integer/material_motion_duration_long_2"
+            android:scrollbarStyle="outsideOverlay" />
+    </androidx.cardview.widget.CardView>
+</RelativeLayout>

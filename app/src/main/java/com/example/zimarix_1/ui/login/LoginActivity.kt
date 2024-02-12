@@ -3,7 +3,6 @@ package com.example.zimarix_1.ui.login
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
-import android.net.wifi.WifiManager
 import android.os.Build
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -13,20 +12,19 @@ import androidx.appcompat.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Base64
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import com.example.zimarix_1.MainActivity
+import com.example.zimarix_1.Activities.MainActivity
 import com.example.zimarix_1.databinding.ActivityLoginBinding
 
 import com.example.zimarix_1.R
-import com.example.zimarix_1.get_device_mac
-import com.example.zimarix_1.load_app_id_and_key
 import com.example.zimarix_1.zimarix_global.Companion.dev_mac
+import get_device_mac
+import load_app_id_and_key
 import java.util.*
 
 

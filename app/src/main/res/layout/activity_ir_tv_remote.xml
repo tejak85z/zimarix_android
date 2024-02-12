@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Ir_Tv_Remote">
+    tools:context=".ir_remotes.Ir_Tv_Remote">
     <ProgressBar
         android:id="@+id/tvprogressBar"
         android:layout_width="wrap_content"

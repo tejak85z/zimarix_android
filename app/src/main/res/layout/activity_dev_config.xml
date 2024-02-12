@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".DevConfig">
+    tools:context=".Activities.DevConfig">
 
     <ProgressBar
         android:id="@+id/configprogressBar"
@@ -15,23 +15,129 @@
         android:id="@+id/switch_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp">
+        android:orientation="horizontal">
         <Button
             android:id="@+id/io"
             android:layout_width="130dp"
             android:layout_height="60dp"
             android:text="SWITCHES"
-            android:max="100"
-            android:layout_marginTop="6dp"/>
+            android:max="100"/>
         <Button
             android:id="@+id/ir"
             android:layout_width="130dp"
             android:layout_height="60dp"
             android:text="REMOTES"
             android:max="100"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="6dp"/>
+            android:layout_marginLeft="16dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/switch_layout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/switch_layout">
+
+        <Button
+            android:id="@+id/cls"
+            android:layout_width="130dp"
+            android:layout_height="70dp"
+            android:layout_gravity="bottom"
+            android:max="100"
+            android:text="CLUSTER SWITCHES" />
+        <Button
+            android:id="@+id/schedules"
+            android:layout_width="130dp"
+            android:layout_height="70dp"
+            android:text="SCHEDULES"
+            android:max="100"
+            android:layout_marginLeft="16dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/switch_layout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/switch_layout1">
+
+        <Button
+            android:id="@+id/powersave"
+            android:layout_width="130dp"
+            android:layout_height="70dp"
+            android:layout_gravity="bottom"
+            android:max="100"
+            android:text="POWERSAVE" />
+        <Button
+            android:id="@+id/wakeword"
+            android:layout_width="130dp"
+            android:layout_height="70dp"
+            android:text="WAKEWORD"
+            android:max="100"
+            android:layout_marginLeft="16dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/switch_layout3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/switch_layout2">
+
+        <Button
+            android:id="@+id/bluetooth"
+            android:layout_width="130dp"
+            android:layout_height="70dp"
+            android:layout_gravity="bottom"
+            android:max="100"
+            android:text="BLUETOOTH SPEAKER" />
+        <Button
+            android:id="@+id/wifi"
+            android:layout_width="130dp"
+            android:layout_height="70dp"
+            android:text="WIFI SETTINGS"
+            android:max="100"
+            android:layout_marginLeft="16dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/switch_layout4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/switch_layout3">
+
+        <Button
+            android:id="@+id/camera"
+            android:layout_width="130dp"
+            android:layout_height="70dp"
+            android:layout_gravity="bottom"
+            android:max="100"
+            android:text="CAMERA AND GESTURES" />
+        <Button
+            android:id="@+id/alexa"
+            android:layout_width="130dp"
+            android:layout_height="70dp"
+            android:text="ALEXA"
+            android:max="100"
+            android:layout_marginLeft="16dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/switch_layout5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/switch_layout4">
+        <Button
+            android:id="@+id/system_config"
+            android:layout_width="130dp"
+            android:layout_height="70dp"
+            android:layout_gravity="bottom"
+            android:max="100"
+            android:text="DEVICE SETTINGS" />
+        <Button
+            android:id="@+id/monitor_cfg"
+            android:layout_width="130dp"
+            android:layout_height="70dp"
+            android:text="MONITOR"
+            android:max="100"
+            android:layout_marginLeft="16dp"/>
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -39,5 +145,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:layout_below="@id/switch_layout"/>
+        android:layout_below="@id/switch_layout5"/>
 </RelativeLayout>

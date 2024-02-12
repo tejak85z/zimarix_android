@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ir_switches">
+    tools:context=".Activities.ir_switches">
     <ProgressBar
         android:id="@+id/irprogressBar"
         android:layout_width="wrap_content"
@@ -20,8 +20,14 @@
             android:layout_width="130dp"
             android:layout_height="60dp"
             android:text="ADD REMOTE"
+            android:max="100"/>
+        <Button
+            android:id="@+id/channels"
+            android:layout_width="130dp"
+            android:layout_height="60dp"
+            android:text="CHANNEL INFO"
             android:max="100"
-            android:layout_marginTop="6dp"/>
+            android:layout_marginLeft="16dp"/>
     </LinearLayout>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/irrecyclerView"

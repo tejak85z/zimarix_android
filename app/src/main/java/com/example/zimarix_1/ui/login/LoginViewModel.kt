@@ -1,7 +1,5 @@
 package com.example.zimarix_1.ui.login
 
-import android.content.Context
-import android.content.Context.WIFI_SERVICE
 import android.util.Base64
 import android.util.Log
 import android.util.Patterns
@@ -11,34 +9,28 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.zimarix_1.R
 import com.example.zimarix_1.data.LoginRepository
-import com.example.zimarix_1.data.Result
 import kotlinx.coroutines.*
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.net.Socket
 import java.net.SocketException
 import java.security.KeyFactory
 import java.security.KeyStore
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
-import javax.crypto.spec.IvParameterSpec
-import javax.crypto.spec.SecretKeySpec
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.annotation.RequiresApi
+import com.example.zimarix_1.RSA_encrpt
 import com.example.zimarix_1.aes_decrpt
 import com.example.zimarix_1.aes_encrpt
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
-import com.example.zimarix_1.getRandomString
 import com.example.zimarix_1.zimarix_global.Companion.appid
 import com.example.zimarix_1.zimarix_global.Companion.appkey
 import com.example.zimarix_1.zimarix_global.Companion.dev_mac
 import com.example.zimarix_1.zimarix_global.Companion.zimarix_server
+import getRandomString
 import java.io.InputStream
-import java.lang.StringBuilder
-import java.net.NetworkInterface
 import java.util.*
 
 
@@ -106,25 +98,6 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
     // A placeholder password validation check
     private fun isPasswordValid(password: String): Boolean {
         return password.length > 5
-    }
-
-    fun RSA_encrpt(publickey: String, data: String):ByteArray{
-        var publicKy = publickey.replace("\\r".toRegex(), "")
-            .replace("\\n".toRegex(), "")
-            //.replace(System.lineSeparator().toRegex(), "")
-            .replace("-----BEGIN PUBLIC KEY-----", "")
-            .replace("-----END PUBLIC KEY-----", "")
-
-        //Encrypt the data with public key
-        var encrypted: ByteArray? = null
-        val publicBytes = Base64.decode(publicKy, Base64.DEFAULT)
-        val keySpec = X509EncodedKeySpec(publicBytes)
-        val keyFactory = KeyFactory.getInstance("RSA")
-        val pubKey = keyFactory.generatePublic(keySpec)
-        val cipher = Cipher.getInstance("RSA/ECB/PKCS1PADDING") //or try with "RSA"
-        cipher.init(Cipher.ENCRYPT_MODE, pubKey)
-        encrypted = cipher.doFinal(data.toByteArray())
-        return encrypted
     }
     fun send_login_data_to_server(username: String, password: String):String{
 

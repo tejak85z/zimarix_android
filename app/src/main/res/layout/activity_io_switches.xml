@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".io_switches">
+    tools:context=".Activities.io_switches">
 
     <ProgressBar
         android:id="@+id/ioprogressBar"

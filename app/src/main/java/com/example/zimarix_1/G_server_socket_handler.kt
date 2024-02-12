@@ -1,8 +1,17 @@
 package com.example.zimarix_1
 
-import android.content.Context
+import android.app.AlertDialog
+import android.os.Handler
 import android.util.Log
+import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
+import clearAppData
+import com.example.zimarix_1.Activities.MainActivity
+import com.example.zimarix_1.Activities.Send_cmd_to_server
+import com.example.zimarix_1.zimarix_global.Companion.serv_sync
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -10,10 +19,21 @@ import kotlinx.coroutines.launch
 import java.io.InputStream
 import java.net.Socket
 import java.util.ArrayList
-
-suspend fun status_config_updater(){
+fun ec_req(req: String):String{
+    var resp = "OK"
+    val enc_req = aes_encrpt(zimarix_global.appkey, zimarix_global.appiv, req)
+    try {
+        zimarix_global.ecsock!!.outputStream.write(enc_req)
+    }catch (t: Throwable){
+        return ""
+    }
+    return resp
+}
+fun status_config_updater(){
     while (true){
-        ec_req("SYNC,"+ zimarix_global.keyver +","+ zimarix_global.ipver +","+ zimarix_global.portver +","+ zimarix_global.monver +",")
+        if(serv_sync == 1) {
+            ec_req("SYNC," + zimarix_global.keyver + "," + zimarix_global.ipver + "," + zimarix_global.portver + "," + zimarix_global.monver + ",")
+        }
         Thread.sleep(5000)
     }
     Log.d("debug ", " -------------- closing send socket")
@@ -70,7 +90,7 @@ fun update_list(idx:Int, data:String){
     }
 }
 
-fun process_server_response(context: Context, data: String){
+fun process_server_response(activity: MainActivity, data: String){
     val param = data.split(',')
     Log.d("debug ", " ---------------------print to tost $param")
 
@@ -105,12 +125,104 @@ fun process_server_response(context: Context, data: String){
     }else if (param[0] == "RESP"){
         GlobalScope.launch(Dispatchers.Main) {
             // Update UI here
-            Toast.makeText(context, param[1], Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, param[1], Toast.LENGTH_SHORT).show()
+        }
+        zimarix_global.serv_sync = 1
+    }else if (param[0] == "OTP") {
+        if (param[1] == "PROCESSING REQUEST") {
+            activity.runOnUiThread {
+                activity.aToast?.cancel() // Cancel any existing toast
+                activity.aToast = Toast.makeText(activity, "REQUEST SUCCESSFUL", Toast.LENGTH_SHORT)
+                activity.aToast?.show()
+            }
+            zimarix_global.serv_sync = 1
+        } else if (param[1] == "CANCELLING REQUEST") {
+            activity.runOnUiThread {
+                activity.aToast?.cancel() // Cancel any existing toast
+                activity.aToast = Toast.makeText(activity, param[1], Toast.LENGTH_SHORT)
+                activity.aToast?.show()
+            }
+            zimarix_global.serv_sync = 1
+        }else if(param[1] == "OTP TIMEOUT"){
+            activity.runOnUiThread {
+                activity.otpdialog.dismiss()
+                activity.aToast?.cancel() // Cancel any existing toast
+                activity.aToast = Toast.makeText(activity, param[1], Toast.LENGTH_SHORT)
+                activity.aToast?.show()
+            }
+            zimarix_global.serv_sync = 1
+        }else{
+            GlobalScope.launch(Dispatchers.Main) {
+                val layout = LinearLayout(activity)
+                layout.orientation = LinearLayout.VERTICAL
+                layout.setPadding(50, 40, 50, 10)
+
+                val hlayout = LinearLayout(activity)
+                hlayout.orientation = LinearLayout.HORIZONTAL
+                hlayout.setPadding(50, 40, 50, 10)
+
+                val otp = EditText(activity)
+                otp.hint = "ENTER 4 digit OTP"
+                hlayout.addView(otp)
+
+                val ok = Button(activity)
+                ok.text = "OK"
+                hlayout.addView(ok)
+                layout.addView(hlayout)
+
+                activity.timerTextView = TextView(activity)
+                layout.addView(activity.timerTextView)
+
+                ok.setOnClickListener(){
+                    activity.aToast = Toast.makeText(activity, "${otp.text.toString().length}", Toast.LENGTH_SHORT)
+                    if(otp.text.toString().length == 4) {
+                        Send_cmd_to_server(otp.text.toString(), activity).execute()
+                        activity.otpdialog.dismiss()
+                    }else{
+                        activity.aToast?.cancel() // Cancel any existing toast
+                        activity.aToast = Toast.makeText(activity, "INVALID OTP", Toast.LENGTH_SHORT)
+                        activity.aToast?.show()
+                    }
+                }
+                val builder = AlertDialog.Builder(activity)
+                    .setTitle(param[1])
+                    .setView(layout)
+                    .setCancelable(false)
+                    .setNegativeButton(android.R.string.cancel) { maindialog, whichButton ->
+                        // so something, or not - dialog will close
+                        Send_cmd_to_server("CANCEL", activity).execute()
+                        activity.otpdialog.dismiss()
+                        activity.otpdialog.dismiss()
+                    }
+                    .setNeutralButton("RESEND"){ maindialog, whichButton ->
+                        // so something, or not - dialog will close
+                        Send_cmd_to_server("RESEND", activity).execute()
+                        activity.otpdialog.dismiss()
+                    }
+                activity.otpdialog = builder.create()
+                activity.otpdialog.show()
+                startTimer(activity.timerTextView)
+            }
         }
     }
 }
 
-fun server_handler(context: Context){
+// Function to start the timer
+private fun startTimer(timerTextView: TextView) {
+    val handler = Handler()
+    var seconds = 60
+    handler.post(object : Runnable {
+        override fun run() {
+            // Update the timer TextView with the current number of seconds
+            timerTextView.text = "Time Left: $seconds seconds"
+            if(seconds > 0)
+                seconds--
+            handler.postDelayed(this, 1000) // Delay for 1 second
+        }
+    })
+}
+
+fun server_handler(activity: MainActivity){
     val bufferSize = 1024
     val buffer = ByteArray(bufferSize)
     var bytesRead: Int
@@ -137,12 +249,14 @@ fun server_handler(context: Context){
                 val msg = "CONNECT"
                 val enc_data = aes_encrpt(zimarix_global.appkey, zimarix_global.appiv, msg)
                 try {
+
                     client!!.outputStream.write(zimarix_global.appid.toByteArray() + ",".toByteArray() + enc_data)
                     bytesRead = inputStream.read(buffer)
                 }catch (t: Throwable){
                     client.close()
                     continue
                 }
+
                 if (bytesRead > 0 && bytesRead % 16 == 0) {
                     val status = aes_decrpt(zimarix_global.appkey,
                         zimarix_global.appiv,
@@ -165,13 +279,15 @@ fun server_handler(context: Context){
                                     zimarix_global.appkey,
                                     zimarix_global.appiv, buffer.copyOf(bytesRead)
                                 )
-                                process_server_response(context, bytedata)
+                                process_server_response(activity, bytedata)
                             } else {
                                 break
                             }
                         }
                         zimarix_global.ecsock = null
                         zimarix_global.ecinputStream = null
+                    }else{
+                        clearAppData(activity)
                     }
                 }
                 client.close()

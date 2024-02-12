@@ -1,4 +1,5 @@
 package com.example.zimarix_1
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
@@ -7,9 +8,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.zimarix_1.Activities.MainActivity
+import com.example.zimarix_1.ir_remotes.Ir_Ac_Remote
+import com.example.zimarix_1.ir_remotes.Ir_Fan_Remote
+import com.example.zimarix_1.ir_remotes.Ir_Music_Remote
+import com.example.zimarix_1.ir_remotes.Ir_Smart_Light_Remote
+import com.example.zimarix_1.ir_remotes.Ir_Switch_Remote
+import com.example.zimarix_1.ir_remotes.Ir_Tv_Remote
 
 class Send_Global_Switch_Req(
     private val value: Int,
@@ -35,6 +44,7 @@ class Send_Global_Switch_Req(
                 val enc_req = aes_encrpt(zimarix_global.appkey, zimarix_global.appiv, req)
                 try {
                     zimarix_global.ecsock!!.outputStream.write(enc_req)
+                    resp = "OK"
                 }catch (t: Throwable){
                     return "FAIL"
                 }
@@ -63,6 +73,7 @@ class Send_Global_Switch_Req(
 
 class SwitchAdapter(private var switchList: MutableList<sw_params>, private val activity: MainActivity) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private lateinit var maindialog: AlertDialog
     companion object {
         private const val TYPE_SWITCH = 1
         private const val TYPE_BUTTON = 2
@@ -89,7 +100,7 @@ class SwitchAdapter(private var switchList: MutableList<sw_params>, private val 
         return when (viewType) {
             TYPE_SWITCH -> {
                 val itemView =
-                    LayoutInflater.from(parent.context).inflate(R.layout.switch_item, parent, false)
+                    LayoutInflater.from(parent.context).inflate(R.layout.item_switch, parent, false)
                 SwitchViewHolder(itemView)
             }
             TYPE_BUTTON -> {
@@ -134,7 +145,34 @@ class SwitchAdapter(private var switchList: MutableList<sw_params>, private val 
                     if (swindex >= 0 && swindex < GSwitches.size) {
                         val b = Bundle()
                         b.putInt("key", swindex) //Your id
-                        if (switchList[position].type == 11){
+                        if (switchList[position].type == 10){
+                            val layout = LinearLayout(activity)
+                            layout.orientation = LinearLayout.HORIZONTAL
+
+                            val on = Button(activity)
+                            on.setText("ON")
+                            on.setOnClickListener {
+                                val req = "CLS,SET,PORT,${switchList[position].id},ON,"
+                                Send_cmd(switchList[position].idx,req,activity).execute()
+                            }
+                            layout.addView(on)
+
+                            val off = Button(activity)
+                            off.setText("OFF")
+                            off.setOnClickListener {
+                                val req = "CLS,SET,PORT,${switchList[position].id},OFF,"
+                                Send_cmd(switchList[position].idx,req,activity).execute()
+                            }
+                            layout.addView(off)
+
+                            layout.setPadding(50, 40, 50, 10)
+
+                            val builder = AlertDialog.Builder(activity)
+                                .setTitle(switchList[position].name)
+                                .setView(layout)
+                            maindialog = builder.create()
+                            maindialog.show()
+                        } else if (switchList[position].type == 11){
                             val intent = Intent(activity, Ir_Ac_Remote::class.java)
                             intent.putExtras(b)
                             activity.startActivity(intent)

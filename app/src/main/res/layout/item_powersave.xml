@@ -1,0 +1,65 @@
+<!-- item_device_config.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="6dp">
+
+    <!-- First Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Switch
+            android:id="@+id/powersave_enable"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="#3498db"
+            android:text="POWERSAVE ENABLE"/>
+        <Switch
+            android:id="@+id/auto_on_enable"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="#3498db"
+            android:text="ENABLE AUTO TURN ON"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:max="100"
+                android:text="TIMEOUT : "
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+            <EditText
+                android:id="@+id/powersave_timeout"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:backgroundTint="#3498db"/>
+            <Button
+                android:id="@+id/powersave_update"
+                android:layout_height="50dp"
+                android:layout_width="wrap_content"
+                android:text="UPDATE"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:backgroundTint="#3498db"
+                android:textColor="#ffffff" />
+
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

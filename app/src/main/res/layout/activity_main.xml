@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".Activities.MainActivity">
     <Button
         android:id="@+id/add_controller"
         android:layout_width="175dp"
@@ -27,6 +27,15 @@
         android:text="stream"
         android:layout_below="@id/add_controller"
         android:layout_alignParentLeft="true"
+        android:layout_marginTop="6dp"/>
+
+    <Button
+        android:id="@+id/scheduler"
+        android:layout_width="175dp"
+        android:layout_height="70dp"
+        android:text="scheduler"
+        android:layout_below="@id/add_controller"
+        android:layout_alignParentRight="true"
         android:layout_marginTop="6dp"/>
 
     <RadioGroup
@@ -70,6 +79,41 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true" />
 
+    <Button
+        android:id="@+id/device_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/recyclerView"
+        android:layout_marginStart="-243dp"
+        android:layout_marginLeft="-243dp"
+        android:layout_marginRight="313dp"
+        android:layout_toEndOf="@+id/recyclerView"
+        android:layout_toRightOf="@+id/recyclerView"
+        android:text="device \ndelete" />
 
+    <Button
+        android:id="@+id/app_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/recyclerView"
+        android:layout_toEndOf="@+id/device_delete"
+        android:layout_toRightOf="@+id/device_delete"
+        android:text="APP \ndelete" />
 
+    <Button
+        android:id="@+id/user_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/recyclerView"
+        android:layout_toEndOf="@+id/app_delete"
+        android:layout_toRightOf="@+id/app_delete"
+        android:text="user\n delete" />
+    <Button
+        android:id="@+id/update_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/recyclerView"
+        android:layout_toEndOf="@+id/user_delete"
+        android:layout_toRightOf="@+id/user_delete"
+        android:text="update\n password" />
 </RelativeLayout>

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Ir_Music_Remote">
+    tools:context=".ir_remotes.Ir_Music_Remote">
     <ProgressBar
         android:id="@+id/muprogressBar"
         android:layout_width="wrap_content"
@@ -32,4 +33,260 @@
             android:layout_marginLeft="10dp"
             android:layout_marginStart="10dp" />
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/mu_movements"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/mu_on_off"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:orientation="horizontal"
+        android:padding="2dp">
+
+        <Button
+            android:id="@+id/mu_left"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="64dp"
+            android:max="100"
+            app:icon="@android:drawable/ic_media_previous" />
+
+        <LinearLayout
+            android:id="@+id/mu_vertical_movements"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:orientation="vertical"
+            android:padding="2dp">
+
+            <Button
+                android:id="@+id/mu_up"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="2dp"
+                android:max="100"
+                app:icon="@android:drawable/arrow_up_float" />
+
+            <Button
+                android:id="@+id/mu_ok"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="2dp"
+                android:max="100"
+                android:text="OK" />
+
+            <Button
+                android:id="@+id/mu_down"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="2dp"
+                android:max="100"
+                app:icon="@android:drawable/arrow_down_float" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/mu_vertical_movements1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:orientation="vertical">
+            <Button
+                android:id="@+id/mu_right"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="65dp"
+                app:icon="@android:drawable/ic_media_next" />
+
+            <Button
+                android:id="@+id/mu_mute"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginLeft="2dp"
+                app:icon="@android:drawable/ic_lock_silent_mode" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/chan_up_down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="20dp"
+        android:layout_below="@id/mu_on_off"
+        android:layout_toRightOf="@id/mu_movements">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="VOLUME"/>
+        <Button
+            android:id="@+id/mu_vol_up"
+            android:layout_width="60dp"
+            android:layout_height="90dp"
+            android:text="+"/>
+        <Button
+            android:id="@+id/mu_vol_down"
+            android:layout_width="60dp"
+            android:layout_height="90dp"
+            android:text="-"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/mu_player"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:orientation="horizontal"
+        android:layout_below="@id/mu_movements"
+        android:padding="2dp">
+
+        <Button
+            android:id="@+id/mu_rewind"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="2dp"
+            android:max="100"
+            app:icon="@android:drawable/ic_media_rew" />
+
+        <Button
+            android:id="@+id/mu_play"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="2dp"
+            android:max="100"
+            app:icon="@android:drawable/ic_media_play" />
+
+        <Button
+            android:id="@+id/mu_pause"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="2dp"
+            android:max="100"
+            app:icon="@android:drawable/ic_media_pause" />
+
+        <Button
+            android:id="@+id/mu_fastfarword"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="2dp"
+            android:max="100"
+            app:icon="@android:drawable/ic_media_ff" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/mu_gplayer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:orientation="horizontal"
+        android:layout_below="@id/mu_player"
+        android:padding="2dp">
+
+        <Button
+            android:id="@+id/mu_previous"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="2dp"
+            android:max="100"
+            app:icon="@android:drawable/ic_media_previous" />
+
+        <Button
+            android:id="@+id/mu_startover"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="2dp"
+            android:max="100"
+            app:icon="@android:drawable/ic_menu_rotate" />
+
+        <Button
+            android:id="@+id/mu_stop"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="2dp"
+            android:max="100"
+            app:icon="@android:drawable/ic_notification_overlay" />
+
+        <Button
+            android:id="@+id/mu_next"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="2dp"
+            android:max="100"
+            app:icon="@android:drawable/ic_media_next" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/mu_info1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp"
+        android:layout_below="@id/mu_gplayer">
+
+        <Button
+            android:id="@+id/mu_pageleft"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="P LEFT"
+            android:max="100"
+            android:layout_marginTop="2dp"/>
+        <Button
+            android:id="@+id/mu_pageup"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="P UP"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+        <Button
+            android:id="@+id/mu_pageright"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="P RIGHT"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/mu_info2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp"
+        android:layout_below="@id/mu_info1">
+
+        <Button
+            android:id="@+id/mu_info"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="INFO"
+            android:max="100"
+            android:layout_marginTop="2dp"/>
+        <Button
+            android:id="@+id/mu_pagedown"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="P DOWN"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+        <Button
+            android:id="@+id/mu_more"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="MORE"
+            android:max="100"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+    </LinearLayout>
+
 </RelativeLayout>
