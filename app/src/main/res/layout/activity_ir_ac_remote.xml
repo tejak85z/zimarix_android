@@ -249,7 +249,4 @@
             android:layout_marginTop="2dp"
             android:layout_marginLeft="10dp"/>
     </LinearLayout>
-
-
-
 </RelativeLayout>

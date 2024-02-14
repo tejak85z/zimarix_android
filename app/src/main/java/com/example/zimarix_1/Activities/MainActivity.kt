@@ -34,6 +34,7 @@ import com.example.zimarix_1.zimarix_global.Companion.app_state
 import com.example.zimarix_1.zimarix_global.Companion.config_watchdog
 import com.example.zimarix_1.zimarix_global.Companion.devices
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import showLogoutConfirmationDialog
@@ -76,6 +77,9 @@ class MainActivity : AppCompatActivity() , update_params{
             }
             CoroutineScope(IO).launch {
                 device_handler(handler, this@MainActivity)
+            }
+            CoroutineScope(Dispatchers.IO).launch {
+                gswitch_updater(this@MainActivity)
             }
         }
 
@@ -169,48 +173,6 @@ class MainActivity : AppCompatActivity() , update_params{
             dialog.show()
         }
 
-        val backgroundThread = Thread {
-            var update = 0
-            while (true) {
-                viewhandler.post {
-                    // for each switch
-                    update = 0
-                    GSwitches.forEach{
-                        // for each physical switch
-                        if (it.id.toInt() < 32) {
-                            val i = it.id.toInt() - 1
-                            val mask = (1 shl i).toShort()
-                            val flag = (devices[it.idx].port and mask).toInt()
-                            // update port if not used recently
-                            if (it.active == 0) {
-                                if (it.switchState != (flag != 0)) {
-                                    it.switchState = flag != 0
-                                    update = 1
-                                }
-                            } else {
-                                if (flag == 0) {
-                                    if (!it.switchState) {
-                                        it.active = 0
-                                    }
-                                } else {
-                                    if (it.switchState) {
-                                        it.active = 0
-                                    }
-                                }
-                                if (it.active != 0)
-                                    it.active = it.active - 1
-                            }
-                        }
-                    }
-                    if(update == 1)
-                        GSwitch_adapter.update()
-                }
-                Thread.sleep(1000)
-            }
-        }
-        // Start the background thread
-        backgroundThread.start()
-
         val radioGroup: RadioGroup = findViewById(R.id.radio_group)
         radioGroup.setOnCheckedChangeListener { group, checkedId ->
             val selectedRadioButton: RadioButton = findViewById(checkedId)
@@ -278,10 +240,8 @@ class MainActivity : AppCompatActivity() , update_params{
             button.text = "UPDATE"
             layout.addView(button)
             button.setOnClickListener() {
-                Log.d("debug ", "===============  ${password.text.length} \n")
                 if(password.text.length > 0 && password.text.length < 32) {
                     val req = "UPDATE,${password.text.toString()},"
-                    Log.d("debug ", "===============  $req \n")
                     zimarix_global.serv_sync = 0
                     Send_cmd_to_server(req, this).execute()
                     dialog.dismiss()
@@ -309,6 +269,48 @@ class MainActivity : AppCompatActivity() , update_params{
                 zimarix_global.serv_sync = 0
                 Send_cmd_to_server(req, this).execute()
             }
+        }
+    }
+
+    fun gswitch_updater(activity: MainActivity){
+        var update = 0
+        while (true) {
+            if (active == true) {
+                viewhandler.post {
+                    // for each switch
+                    update = 0
+                    GSwitches.forEach {
+                        // for each physical switch
+                        if (it.id.toInt() < 32) {
+                            val i = it.id.toInt() - 1
+                            val mask = (1 shl i).toShort()
+                            val flag = (devices[it.idx].port and mask).toInt()
+                            // update port if not used recently
+                            if (it.active == 0) {
+                                if (it.switchState != (flag != 0)) {
+                                    it.switchState = flag != 0
+                                    update = 1
+                                }
+                            } else {
+                                if (flag == 0) {
+                                    if (!it.switchState) {
+                                        it.active = 0
+                                    }
+                                } else {
+                                    if (it.switchState) {
+                                        it.active = 0
+                                    }
+                                }
+                                if (it.active != 0)
+                                    it.active = it.active - 1
+                            }
+                        }
+                    }
+                    if (update == 1)
+                        GSwitch_adapter.update()
+                }
+            }
+            Thread.sleep(1000)
         }
     }
     override fun onResume() {

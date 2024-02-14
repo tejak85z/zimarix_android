@@ -129,14 +129,16 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
                     val ciphertext: ByteArray = aes_encrpt(appkey, "abcdefghijklmnop", reg_data)
                     client!!.outputStream.write(ciphertext)
                     bytesRead = inputStream.read(buffer)
-                    val login_resp = aes_decrpt(appkey, "abcdefghijklmnop", buffer.copyOf(bytesRead))
-                    Log.d("debug ", " ------------------received login resp $login_resp\n")
-                    val param = login_resp.split(",")
-                    if (param.size >= 2){
-                        if (param[0] != "-1") {
-                            appid = param[0]
+                    if(bytesRead > 0) {
+                        val login_resp =
+                            aes_decrpt(appkey, "abcdefghijklmnop", buffer.copyOf(bytesRead))
+                        val param = login_resp.split(",")
+                        if (param.size >= 2) {
+                            if (param[0] != "-1") {
+                                appid = param[0]
+                            }
+                            resp = param[1]
                         }
-                        resp = param[1]
                     }
                 }
             }
@@ -174,13 +176,57 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
                 bytesRead = inputStream.read(buffer)
                 if(bytesRead == 16) {
                     appkey = aes_decrpt(randomKey, "abcdefghijklmnop", buffer.copyOf(bytesRead))
-                    Log.d("debug ", " ------------------received app key  $appkey encrypted with $randomKey\n")
                     val reg_data = username + "," + password + "," + mobile +','+dev_mac
                     val ciphertext: ByteArray = aes_encrpt(appkey,"abcdefghijklmnop", reg_data)
                     client!!.outputStream.write(ciphertext)
 
                     bytesRead = inputStream.read(buffer)
                     Log.d("debug ", " ------------------received $bytesRead bytes\n")
+                    resp = aes_decrpt(appkey,"abcdefghijklmnop", buffer.copyOf(bytesRead))
+                    Log.d("debug ", " received ======  ff $resp")
+                    if(!resp.contains("OTP")){
+                        client!!.close()
+                    }
+                }
+            }
+        }catch (t: SocketException){
+            Log.d("debug ", " ------------------socket exception in registration connect failure\n")
+            resp = "Unable to connect to server. Check network"
+        }
+        return resp
+    }
+
+    fun send_pwd_rst_to_server(username: String):String{
+        var resp = "FAILED TO CONNECT TO SERVER"
+        val bufferSize = 1024
+        val buffer = ByteArray(bufferSize)
+        var bytesRead: Int
+        try {
+            client = Socket(zimarix_server, 11113)
+            client!!.outputStream.write("PWDRST".toByteArray())
+
+            //Get Public Key from Server
+            var publickey = ""
+            val inputStream: InputStream = client.getInputStream()
+            // Read data into the buffer
+            bytesRead = inputStream.read(buffer)
+            // Convert the received bytes to a string (assuming text data)
+            publickey = String(buffer, 0, bytesRead)
+            if (publickey.contains("END PUBLIC KEY")) {
+                //Generate a random key in device
+                val randomKey = getRandomString(16)
+                //Encrypt the Random key with public key and send to server
+                var encrypted: ByteArray? = RSA_encrpt(publickey, randomKey)
+                client!!.outputStream.write(encrypted)
+
+                bytesRead = inputStream.read(buffer)
+                if(bytesRead == 16) {
+                    appkey = aes_decrpt(randomKey, "abcdefghijklmnop", buffer.copyOf(bytesRead))
+                    val reg_data = username
+                    val ciphertext: ByteArray = aes_encrpt(appkey,"abcdefghijklmnop", reg_data)
+                    client!!.outputStream.write(ciphertext)
+
+                    bytesRead = inputStream.read(buffer)
                     resp = aes_decrpt(appkey,"abcdefghijklmnop", buffer.copyOf(bytesRead))
                     Log.d("debug ", " received ======  ff $resp")
                     if(!resp.contains("OTP")){
@@ -202,7 +248,7 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
         try {
             //Encrypt OTP string
             val ciphertext: ByteArray = aes_encrpt(appkey,"abcdefghijklmnop", otp_msg)
-            client!!.outputStream.write(ciphertext)
+            client.outputStream.write(ciphertext)
             val inputStream: InputStream = client.getInputStream()
             val bytesRead = inputStream.read(buffer)
             val reg_resp = aes_decrpt(appkey,"abcdefghijklmnop", buffer.copyOf(bytesRead))
@@ -220,9 +266,30 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
         return resp
     }
 
+    fun send_update_password(password: String): String {
+        var resp = ""
+        val bufferSize = 1024
+        val buffer = ByteArray(bufferSize)
+        try {
+            //Encrypt OTP string
+            val ciphertext: ByteArray = aes_encrpt(appkey,"abcdefghijklmnop", password)
+            client.outputStream.write(ciphertext)
+            val inputStream: InputStream = client.getInputStream()
+            val bytesRead = inputStream.read(buffer)
+            if (bytesRead > 0) {
+                resp = aes_decrpt(appkey, "abcdefghijklmnop", buffer.copyOf(bytesRead))
+            }else{
+                resp = "0,FAILED to get response from server"
+            }
+        } catch (t: SocketException){
+            resp = "0,Unable to connect to server. Check network"
+        }
+        return resp
+    }
+
     fun close_reg_socket(){
         viewModelScope.launch(Dispatchers.IO){
-            client!!.close()
+            client.close()
         }
     }
     fun getKey(): SecretKey {
@@ -261,6 +328,20 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
          return ser_resp
     }
 
+    fun mobile_otp_validate(mobile_otp: String): String {
+        ser_resp = ""
+        if (mobile_otp.length > 6)
+            return "INVALID MOBILE OTP"
+        val reg_data = mobile_otp
+        viewModelScope.launch(Dispatchers.IO){
+            ser_resp = verify_otp(reg_data)
+        }
+        while(ser_resp == ""){
+            Thread.sleep(100)
+        }
+        return ser_resp
+    }
+
     @RequiresApi(Build.VERSION_CODES.M)
     fun register(username: String, password: String, password1: String, name: String, mobile: String): String {
         // can be launched in a separate asynchronous job
@@ -296,6 +377,40 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
         reg_resp = ""
         viewModelScope.launch(Dispatchers.IO) {
             reg_resp = send_reg_data_to_server(username, password, mobile)
+        }
+        while(reg_resp == ""){
+            Thread.sleep(100)
+        }
+        return reg_resp
+    }
+
+    fun forgot_password(username: String): String {
+
+        if(!Patterns.EMAIL_ADDRESS.matcher(username).matches() || username.isBlank()){
+            return "Enter Valid Email.(username)"
+        }
+        reg_resp = ""
+        viewModelScope.launch(Dispatchers.IO) {
+            reg_resp = send_pwd_rst_to_server(username)
+        }
+        while(reg_resp == ""){
+            Thread.sleep(100)
+        }
+        return reg_resp
+    }
+    fun send_password_update(password: String, password1: String): String {
+
+        if(password.length < 5){
+            return "-1,Password Length Invalid"
+        }
+
+        if(password != password1) {
+            return "-1,Password Do No Match"
+        }
+
+        reg_resp = ""
+        viewModelScope.launch(Dispatchers.IO) {
+            reg_resp = send_update_password(password)
         }
         while(reg_resp == ""){
             Thread.sleep(100)

@@ -12,30 +12,43 @@ import androidx.appcompat.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Base64
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.example.zimarix_1.Activities.MainActivity
 import com.example.zimarix_1.databinding.ActivityLoginBinding
 
 import com.example.zimarix_1.R
+import com.example.zimarix_1.update_params
 import com.example.zimarix_1.zimarix_global.Companion.dev_mac
 import get_device_mac
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import load_app_id_and_key
 import java.util.*
 
 
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : AppCompatActivity() , update_params {
 
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var binding: ActivityLoginBinding
+    override lateinit var progressBar: ProgressBar
+    override var aToast: Toast? = null
+    override var isTaskInProgress: Boolean = false
+    override var active: Boolean = true
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //progressBar = findViewById(R.id.loginprogressbar)
+        //progressBar.visibility = View.GONE
 
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -43,8 +56,8 @@ class LoginActivity : AppCompatActivity() {
         val username = binding.username
         val password = binding.password
         val login = binding.login
-        val loading = binding.loading
         val register = binding.register
+        val forgot = binding.forgotPassword
 
         loginViewModel = ViewModelProvider(this, LoginViewModelFactory())
             .get(LoginViewModel::class.java)
@@ -76,7 +89,6 @@ class LoginActivity : AppCompatActivity() {
         loginViewModel.loginResult.observe(this@LoginActivity, Observer {
             val loginResult = it ?: return@Observer
 
-            loading.visibility = View.GONE
             if (loginResult.error != null) {
                 showLoginFailed(loginResult.error)
             }
@@ -194,7 +206,129 @@ class LoginActivity : AppCompatActivity() {
                     dialog.show()
                 }
             }
+            if (forgot != null) {
+                forgot.setOnClickListener {
+                    val layout = LinearLayout(this@LoginActivity)
+                    layout.orientation = LinearLayout.VERTICAL
+
+                    val username = EditText(this@LoginActivity)
+                    username.setSingleLine()
+                    username.hint = "Email Associated with Alexa Account"
+                    layout.addView(username)
+
+                    layout.setPadding(50, 40, 50, 10)
+
+                    val builder = AlertDialog.Builder(context)
+                        .setTitle("FORGOT PASSWORD")
+                        .setMessage("Enter USER ID")
+                        .setView(layout)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
+                            // so something, or not - dialog will close
+                        }
+                    val dialog = builder.create()
+
+                    dialog.setOnShowListener {
+                        val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                        okButton.setOnClickListener {
+                            // dialog won't close by default
+                            val ret = loginViewModel.forgot_password(username.text.toString())
+                            Toast.makeText(this@LoginActivity, ret, Toast.LENGTH_SHORT).show()
+                            if(ret.contains("OTP")) {
+                                mobileopenotpdialog()
+                                dialog.dismiss()
+                                return@setOnClickListener
+                            }
+                        }
+                    }
+                    dialog.show()
+                }
+            }
         }
+    }
+
+    private fun mobileopenotpdialog() {
+        val layout1 = LinearLayout(this)
+        layout1.orientation = LinearLayout.VERTICAL
+        val mobile_otp = EditText(this)
+        mobile_otp.setSingleLine()
+        mobile_otp.hint = "Enter OTP From moble"
+        layout1.addView(mobile_otp)
+
+        layout1.setPadding(50, 40, 50, 10)
+        val builder = AlertDialog.Builder(this)
+            .setTitle("Verify OTP")
+            .setMessage("Retry if otp failed to receive within 90 sec")
+            .setView(layout1)
+            .setPositiveButton(android.R.string.ok, null)
+            .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
+                // so something, or not - dialog will close
+            }
+        val dialog1 = builder.create()
+        dialog1.setOnShowListener {
+            val okButton = dialog1.getButton(AlertDialog.BUTTON_POSITIVE)
+            okButton.setOnClickListener {
+                val motp = mobile_otp.text.toString()
+                val ret = loginViewModel.mobile_otp_validate(motp)
+                Log.d("debug ", "================= 3 $ret\n")
+                if(ret.contains("PROCESSING REQUEST")) {
+                    Toast.makeText(this@LoginActivity, "UPDATE PASSWORD", Toast.LENGTH_SHORT).show()
+                    dialog1.dismiss()
+                    password_update_dialog()
+                    return@setOnClickListener
+                }else{
+                    Toast.makeText(this@LoginActivity, ret, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+        dialog1.show()
+    }
+
+    private fun password_update_dialog(){
+        val layout = LinearLayout(this@LoginActivity)
+        layout.orientation = LinearLayout.VERTICAL
+
+        val password = EditText(this@LoginActivity)
+        password.setSingleLine()
+        password.hint = "Setup New Account Password"
+        layout.addView(password)
+
+        val password1 = EditText(this@LoginActivity)
+        password1.setSingleLine()
+        password1.hint = "Re-enter Account Password"
+        layout.addView(password1)
+
+        layout.setPadding(50, 40, 50, 10)
+
+        val builder = AlertDialog.Builder(this)
+            .setTitle("User Registration")
+            .setMessage("Enter the following details to register fresh")
+            .setView(layout)
+            .setPositiveButton(android.R.string.ok, null)
+            .setNegativeButton(android.R.string.cancel) { dialog, whichButton ->
+                // so something, or not - dialog will close
+            }
+        val dialog = builder.create()
+
+        dialog.setOnShowListener {
+            val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            okButton.setOnClickListener {
+                // dialog won't close by default
+                val ret = loginViewModel.send_password_update(
+                    password.text.toString(),
+                    password1.text.toString())
+                val param = ret.split(",")
+                if (param.size >= 2) {
+                    Toast.makeText(this@LoginActivity, param[1], Toast.LENGTH_SHORT).show()
+                    if (param[0] == "0") {
+                        loginViewModel.close_reg_socket()
+                        dialog.dismiss()
+                        return@setOnClickListener
+                    }
+                }
+            }
+        }
+        dialog.show()
     }
 
     private fun openotpdialog(){

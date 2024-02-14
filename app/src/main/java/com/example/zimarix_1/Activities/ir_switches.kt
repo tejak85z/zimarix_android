@@ -365,7 +365,6 @@ fun create_ir_switch(sw: Button, cmd: String, dev_idx: Int, activity: update_par
 }
 
 fun ir_updater(index: Int, btn_list: MutableList<ir_button>, devConfig: update_params){
-    Log.d("debug ", " -------------------------------starting ir_updater\n")
     while (true){
         if (devConfig.active == true) {
             val resp = dev_req(GSwitches[index].idx, "IR,GET,PORT,${GSwitches[index].id},")
